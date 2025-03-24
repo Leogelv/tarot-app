@@ -1,0 +1,26 @@
+{
+  "short_name": "Tarot Insights",
+  "name": "Tarot Insights: Daily Cards & Readings",
+  "icons": [
+    {
+      "src": "/tarot-icon.svg",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/tarot-icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/tarot-icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#3a2a6c",
+  "background_color": "#f8f5ff",
+  "orientation": "portrait"
+} 
