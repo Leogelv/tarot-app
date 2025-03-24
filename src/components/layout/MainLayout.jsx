@@ -1,75 +1,61 @@
-import React, { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 
-// Основные компоненты
+// Components
 import Navbar from './Navbar';
 import Footer from './Footer';
-
-// Мобильные компоненты
-import MobileHeader from '../mobile/MobileHeader';
-import MobileNavbar from '../mobile/MobileNavbar';
-
-// Эффекты и анимации
+import MobileHeader from './MobileHeader';
+import MobileNavbar from './MobileNavbar';
 import TarotBackground from '../effects/TarotBackground';
 import PageTransition from '../effects/PageTransition';
 
+// Main layout component that wraps all pages
 const MainLayout = () => {
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(false);
   
-  // Определяем тип устройства при загрузке и при изменении размера окна
+  // Check if device is mobile
   useEffect(() => {
-    const checkDevice = () => {
-      setIsMobile(window.innerWidth < 768);
+    const checkDeviceType = () => {
+      setIsMobile(window.innerWidth <= 767);
     };
     
-    // Инициальная проверка
-    checkDevice();
+    // Initial check
+    checkDeviceType();
     
-    // Добавляем слушатель изменения размера окна
-    window.addEventListener('resize', checkDevice);
+    // Listen for window resize
+    window.addEventListener('resize', checkDeviceType);
     
-    // Очистка при размонтировании
-    return () => {
-      window.removeEventListener('resize', checkDevice);
-    };
-  }, []);
-  
-  // Добавляем специальный класс для тела при мобильном виде
-  useEffect(() => {
+    // Add body class for mobile styling
     if (isMobile) {
-      document.body.classList.add('is-mobile-view');
+      document.body.classList.add('mobile-view');
     } else {
-      document.body.classList.remove('is-mobile-view');
+      document.body.classList.remove('mobile-view');
     }
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', checkDeviceType);
+    };
   }, [isMobile]);
 
   return (
     <LayoutContainer>
-      {/* 3D фон для мобильной версии */}
       {isMobile && <TarotBackground />}
       
-      {/* Мобильный заголовок */}
-      {isMobile && <MobileHeader />}
+      {isMobile ? <MobileHeader /> : <Navbar />}
       
-      {/* Основная десктопная навигация */}
-      {!isMobile && <Navbar />}
-      
-      {/* Основной контент с анимацией перехода */}
-      <MainContent>
+      <MainContent $isMobile={isMobile}>
         <AnimatePresence mode="wait">
-          <PageTransition>
+          <PageTransition key={location.pathname}>
             <Outlet />
           </PageTransition>
         </AnimatePresence>
       </MainContent>
       
-      {/* Десктопный футер */}
-      {!isMobile && <Footer />}
-      
-      {/* Мобильная навигация */}
-      {isMobile && <MobileNavbar />}
+      {isMobile ? <MobileNavbar /> : <Footer />}
     </LayoutContainer>
   );
 };
@@ -78,23 +64,15 @@ const LayoutContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  
-  /* Стили для мобильного устройства */
-  body.is-mobile-view & {
-    background: none;
-  }
+  position: relative;
 `;
 
 const MainContent = styled.main`
   flex: 1;
+  padding: ${props => props.$isMobile ? '70px 0 80px' : '100px 0 60px'};
+  width: 100%;
+  max-width: 100vw;
   position: relative;
-  z-index: 1;
-  
-  /* Стили для мобильного устройства */
-  body.is-mobile-view & {
-    padding-top: 60px;
-    padding-bottom: 80px;
-  }
 `;
 
 export default MainLayout; 

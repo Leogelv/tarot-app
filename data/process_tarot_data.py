@@ -2,108 +2,71 @@
 import json
 import os
 
-# Load the three JSON files
-with open('tarot-basic.json', 'r') as f:
-    basic_data = json.load(f)
+# Путь к JSON файлу с данными о картах
+json_file_path = 'data/tarot-cards.json'
 
-with open('tarot-images.json', 'r') as f:
-    images_data = json.load(f)
+# Путь к папке с изображениями карт
+images_dir = 'public/images/cards'
 
-with open('tarot-interpretations.json', 'r') as f:
-    interpretations_data = json.load(f)
+# Путь к выходному файлу
+output_file = 'src/services/tarotData.js'
 
-# Create a mapping from card name to interpretation
-interpretations_map = {}
-for card in interpretations_data['tarot_interpretations']:
-    # Normalize the name to handle slight differences in naming
-    name = card['name']
-    if name == 'The Papess/High Priestess':
-        name = 'The High Priestess'
-    elif name == 'The Pope/Hierophant':
-        name = 'The Hierophant'
-    
-    interpretations_map[name] = {
-        'fortune_telling': card.get('fortune_telling', []),
-        'keywords': card.get('keywords', []),
-        'meanings': card.get('meanings', {
-            'light': [],
-            'shadow': []
-        }),
-        'rank': card.get('rank', 0),
-        'suit': card.get('suit', '')
-    }
+# Загрузка данных из JSON файла
+with open(json_file_path, 'r') as f:
+    tarot_data = json.load(f)
 
-# Create a mapping from card name to image filename
-image_map = {}
-for card in images_data['cards']:
-    image_map[card['name']] = card.get('img', '')
+# Создание структуры данных для JavaScript
+js_data = []
 
-# Create the combined dataset
-combined_cards = []
-for card in basic_data['cards']:
-    name = card['name']
-    
-    # Get interpretations if available
-    interpretation = interpretations_map.get(name, {
-        'fortune_telling': [],
-        'keywords': [],
-        'meanings': {
-            'light': [],
-            'shadow': []
-        },
-        'rank': 0,
-        'suit': ''
-    })
-    
-    # Get image filename if available
-    img = image_map.get(name, '')
-    
-    # Create modern interpretations based on the light meanings
-    light_meanings = interpretation.get('meanings', {}).get('light', [])
-    modern_interpretation = "This card represents " + ", ".join(light_meanings[:3]) if light_meanings else ""
-    
-    # Create affirmations based on keywords and light meanings
-    keywords = interpretation.get('keywords', [])
-    affirmation = ""
-    if keywords and len(keywords) > 0:
-        affirmation = f"I embrace {keywords[0]} and welcome its energy into my life."
-    elif light_meanings and len(light_meanings) > 0:
-        affirmation = f"I am {light_meanings[0].lower()}."
-    
-    # Create the combined card data
-    combined_card = {
-        'name': name,
-        'number': card.get('number', ''),
-        'arcana': card.get('arcana', ''),
-        'suit': card.get('suit', None),
-        'image': img,
-        'fortune_telling': interpretation.get('fortune_telling', []),
-        'keywords': interpretation.get('keywords', []),
-        'meanings': interpretation.get('meanings', {
-            'light': [],
-            'shadow': []
-        }),
-        'modern_interpretation': modern_interpretation,
-        'affirmation': affirmation
-    }
-    
-    combined_cards.append(combined_card)
-
-# Create the final dataset
-final_data = {
-    'description': 'Combined tarot card dataset with images and interpretations',
-    'cards': combined_cards
+# Описания и значения карт (можно расширить в будущем)
+card_meanings = {
+    "The Fool": {
+        "description": "The Fool represents new beginnings, optimism, and taking a leap of faith. It's about embarking on a journey without knowing the destination.",
+        "upright_meaning": "New beginnings, innocence, spontaneity, free spirit",
+        "reversed_meaning": "Recklessness, risk-taking, second-guessing yourself",
+        "keywords": ["adventure", "potential", "opportunity", "beginnings"],
+        "element": "Air"
+    },
+    # Другие карты можно добавить позже
 }
 
-# Save the combined dataset
-with open('combined_tarot_data.json', 'w') as f:
-    json.dump(final_data, f, indent=2)
+# Получение списка файлов изображений
+image_files = os.listdir(images_dir)
 
-print(f"Combined dataset created with {len(combined_cards)} cards.")
+# Функция для получения полного пути к изображению
+def get_image_path(img_name):
+    return f'/images/cards/{img_name}'
 
-# Create a sample for the 3D card component
-sample_cards = combined_cards[:5]  # Take the first 5 cards
-with open('sample_cards.json', 'w') as f:
-    json.dump({'cards': sample_cards}, f, indent=2)
+# Преобразование данных в нужный формат
+for card in tarot_data['cards']:
+    card_name = card['name']
+    card_data = {
+        "name": card_name,
+        "number": card['number'],
+        "arcana": card['arcana'],
+        "suit": card['suit'].lower() if card['suit'] else None,
+        "image_url": get_image_path(card['img']),
+        "description": card_meanings.get(card_name, {}).get("description", f"The {card_name} is a powerful symbol in the tarot deck."),
+        "upright_meaning": card_meanings.get(card_name, {}).get("upright_meaning", "Meaning to be discovered"),
+        "reversed_meaning": card_meanings.get(card_name, {}).get("reversed_meaning", "Meaning to be discovered"),
+        "keywords": card_meanings.get(card_name, {}).get("keywords", ["mystery", "symbolism"]),
+        "element": card_meanings.get(card_name, {}).get("element", "Unknown")
+    }
+    
+    # Преобразование типа для supabase
+    if card['arcana'] == 'Major Arcana':
+        card_data['type'] = 'major'
+    else:
+        card_data['type'] = 'minor'
+    
+    js_data.append(card_data)
 
-print(f"Sample dataset created with {len(sample_cards)} cards.")
+# Создание JavaScript файла
+with open(output_file, 'w') as f:
+    f.write("// Автоматически сгенерированные данные о картах Таро\n\n")
+    f.write("const tarotCards = ")
+    f.write(json.dumps(js_data, indent=2))
+    f.write(";\n\n")
+    f.write("export default tarotCards;\n")
+
+print(f"Данные о {len(js_data)} картах Таро успешно сгенерированы в {output_file}")

@@ -1,364 +1,203 @@
 /* Global CSS Variables */
 :root {
-  /* Color Scheme */
-  --color-primary: #3a2a6c;
-  --color-primary-light: #5b4a9c;
-  --color-primary-dark: #28194f;
-  --color-secondary: #ae66ae;
-  --color-secondary-light: #ce86ce;
-  --color-secondary-dark: #8e468e;
-  
-  /* UI Colors */
-  --color-background: #f8f5ff;
-  --color-background-card: #ffffff;
-  --color-text: #333333;
-  --color-text-light: #777777;
-  --color-border: #e0e0e0;
-  
-  /* Status Colors */
-  --color-success: #4caf50;
-  --color-warning: #ff9800;
-  --color-error: #f44336;
-  --color-info: #2196f3;
-  
-  /* Spacing */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 2rem;
-  --spacing-xl: 3rem;
+  /* Colors - Dark Theme */
+  --background: #12121f;
+  --background-secondary: #1e1e2f;
+  --card-bg: #252538;
+  --primary: #9b59d9;
+  --primary-light: #b07de2;
+  --primary-dark: #7a44b0;
+  --secondary: #e63e6d;
+  --accent: #ffc107;
+  --text: #f0f0f0;
+  --text-secondary: #aaa;
+  --border: #444464;
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  --glow: 0 0 20px rgba(155, 89, 217, 0.4);
   
   /* Fonts */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, 
-    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-heading: 'Unbounded', sans-serif;
+  --font-body: 'Montserrat', sans-serif;
   
-  /* Shadows */
-  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
-  
-  /* Border Radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-rounded: 9999px;
+  /* Sizes */
+  --header-height: 70px;
+  --footer-height: 60px;
+  --navbar-height: 60px;
+  --radius: 12px;
+  --radius-large: 24px;
   
   /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-normal: 300ms ease;
-  --transition-slow: 500ms ease;
+  --transition-speed: 0.3s;
+  --transition-speed-slow: 0.5s;
 }
 
-/* Base Styles */
+/* Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--font-primary);
-  background-color: var(--color-background);
-  color: var(--color-text);
-  line-height: 1.6;
-  min-height: 100vh;
+html, body {
+  height: 100%;
+  width: 100%;
   overflow-x: hidden;
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+body.mobile-view {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+body.mobile-view::-webkit-scrollbar {
+  display: none;
+}
+
+/* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  color: var(--color-primary);
-  margin-bottom: var(--spacing-md);
-  line-height: 1.3;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+h1 {
+  font-size: 2.75rem;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 2.25rem;
+  margin-bottom: 1.25rem;
+}
+
+h3 {
+  font-size: 1.75rem;
 }
 
 p {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--primary);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-speed) ease;
 }
 
 a:hover {
-  color: var(--color-secondary);
+  color: var(--primary-light);
 }
 
-button, .button {
-  cursor: pointer;
-  border: none;
-  font-family: var(--font-primary);
-  font-weight: 600;
-  border-radius: var(--radius-rounded);
+/* Card Styles */
+.tarot-card {
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.tarot-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--glow), var(--card-shadow);
+}
+
+.card-title {
+  color: var(--primary);
+  margin-bottom: 0.75rem;
+  font-family: var(--font-heading);
+}
+
+.card-description {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-block;
   padding: 0.75rem 1.5rem;
-  transition: all var(--transition-normal);
-  background-color: var(--color-primary);
+  border-radius: var(--radius);
+  background-color: var(--primary);
   color: white;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+  text-align: center;
 }
 
-button:hover, .button:hover {
-  background-color: var(--color-primary-dark);
+.btn:hover {
+  background-color: var(--primary-light);
   transform: translateY(-2px);
 }
 
-button:disabled, .button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
+.btn-secondary {
+  background-color: var(--secondary);
 }
 
-input, textarea, select {
-  font-family: var(--font-primary);
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: white;
-  font-size: 1rem;
-  transition: border-color var(--transition-fast);
-  width: 100%;
+.btn-secondary:hover {
+  background-color: #f84b7c;
 }
 
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(58, 42, 108, 0.2);
+.btn-outline {
+  background-color: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
 }
 
-/* Form Label */
-label {
-  display: block;
-  margin-bottom: var(--spacing-sm);
-  font-weight: 500;
+.btn-outline:hover {
+  background-color: rgba(155, 89, 217, 0.1);
 }
 
-/* Form Group */
-.form-group {
-  margin-bottom: var(--spacing-lg);
-}
-
-/* Form Error */
-.form-error {
-  color: var(--color-error);
-  font-size: 0.875rem;
-  margin-top: var(--spacing-xs);
-}
-
-/* Utility Classes */
-
-/* Margins */
-.mt-1 { margin-top: var(--spacing-xs); }
-.mt-2 { margin-top: var(--spacing-sm); }
-.mt-3 { margin-top: var(--spacing-md); }
-.mt-4 { margin-top: var(--spacing-lg); }
-.mt-5 { margin-top: var(--spacing-xl); }
-
-.mb-1 { margin-bottom: var(--spacing-xs); }
-.mb-2 { margin-bottom: var(--spacing-sm); }
-.mb-3 { margin-bottom: var(--spacing-md); }
-.mb-4 { margin-bottom: var(--spacing-lg); }
-.mb-5 { margin-bottom: var(--spacing-xl); }
-
-/* Paddings */
-.p-1 { padding: var(--spacing-xs); }
-.p-2 { padding: var(--spacing-sm); }
-.p-3 { padding: var(--spacing-md); }
-.p-4 { padding: var(--spacing-lg); }
-.p-5 { padding: var(--spacing-xl); }
-
-/* Text Alignment */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.text-right { text-align: right; }
-
-/* Container */
+/* Container & Grid Styles */
 .container {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
+  padding: 0 20px;
 }
 
-/* Card */
-.card {
-  background-color: var(--color-background-card);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  padding: var(--spacing-lg);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+.container-fluid {
+  width: 100%;
+  padding: 0 20px;
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
-}
-
-/* Grid */
 .grid {
   display: grid;
-  gap: var(--spacing-md);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
-
-@media (max-width: 992px) {
-  .grid-4 { grid-template-columns: repeat(3, 1fr); }
+/* Card Grid for Tarot Cards */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2rem;
 }
 
-@media (max-width: 768px) {
-  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+/* Animations */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-@media (max-width: 576px) {
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-}
-
-/* Loading Spinner */
-.loading-spinner {
-  display: inline-block;
-  width: 50px;
-  height: 50px;
-  border: 3px solid rgba(58, 42, 108, 0.3);
-  border-radius: 50%;
-  border-top-color: var(--color-primary);
-  animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Responsive Utilities */
-@media (max-width: 576px) {
-  h1 { font-size: 2rem; }
-  h2 { font-size: 1.75rem; }
-  h3 { font-size: 1.5rem; }
-  .container { padding: 0 var(--spacing-sm); }
-  button, .button { padding: 0.6rem 1.2rem; }
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(58, 42, 108, 0.05);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-primary-light);
-  border-radius: var(--radius-rounded);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary);
-}
-
-/* Настройки для мобильного приложения */
-body.is-mobile-view {
-  /* Отключение скроллбара в мобильном режиме */
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  
-  /* Стиль скроллбара */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(174, 102, 174, 0.5) rgba(58, 42, 108, 0.1);
-}
-
-body.is-mobile-view::-webkit-scrollbar {
-  width: 5px;
-}
-
-body.is-mobile-view::-webkit-scrollbar-track {
-  background: rgba(58, 42, 108, 0.1);
-}
-
-body.is-mobile-view::-webkit-scrollbar-thumb {
-  background-color: rgba(174, 102, 174, 0.5);
-  border-radius: 10px;
-}
-
-/* Специальные мобильные стили для карточек */
-@media (max-width: 767px) {
-  body.is-mobile-view .card-container {
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    background-color: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    box-shadow: 
-      0 4px 30px rgba(0, 0, 0, 0.1),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.2);
-  }
-  
-  body.is-mobile-view .page-container {
-    background-color: transparent;
-    color: white;
-  }
-  
-  body.is-mobile-view .card-title {
-    color: white;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  }
-  
-  body.is-mobile-view .card-description {
-    color: rgba(255, 255, 255, 0.9);
-  }
-  
-  /* Градиентная заливка кнопок */
-  body.is-mobile-view .primary-button {
-    background: linear-gradient(135deg, #8e44ad, #6c3483);
-    box-shadow: 0 4px 15px rgba(110, 64, 170, 0.4);
-    border: none;
-    color: white;
-    border-radius: 20px;
-    padding: 12px 24px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    transform: translateY(0);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  
-  body.is-mobile-view .primary-button:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 5px rgba(110, 64, 170, 0.4);
-  }
-  
-  /* Эффекты нажатия для элементов */
-  body.is-mobile-view .tap-highlight {
-    -webkit-tap-highlight-color: transparent;
-    position: relative;
-  }
-  
-  body.is-mobile-view .tap-highlight::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: transparent;
-    border-radius: inherit;
-    transition: background-color 0.3s ease;
-  }
-  
-  body.is-mobile-view .tap-highlight:active::after {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-}
-
-/* Анимации для мобильных устройств */
 @keyframes float {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
@@ -366,15 +205,112 @@ body.is-mobile-view::-webkit-scrollbar-thumb {
 }
 
 @keyframes glow {
-  0% { box-shadow: 0 0 5px rgba(174, 102, 174, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(174, 102, 174, 0.6); }
-  100% { box-shadow: 0 0 5px rgba(174, 102, 174, 0.3); }
+  0% { box-shadow: 0 0 10px rgba(155, 89, 217, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(155, 89, 217, 0.5); }
+  100% { box-shadow: 0 0 10px rgba(155, 89, 217, 0.2); }
 }
 
-body.is-mobile-view .float-animation {
-  animation: float 5s ease-in-out infinite;
+.animated-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-body.is-mobile-view .glow-animation {
+.animated-glow {
   animation: glow 3s ease-in-out infinite;
+}
+
+/* Loading Animation */
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(155, 89, 217, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  margin: 0 auto 1rem auto;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mobile Styles */
+@media (max-width: 767px) {
+  :root {
+    --header-height: 60px;
+    --footer-height: 50px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+  }
+  
+  .container {
+    padding: 0 15px;
+  }
+  
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .tarot-card {
+    padding: 1rem;
+  }
+  
+  .card-description {
+    font-size: 0.85rem;
+  }
+  
+  .btn {
+    padding: 0.65rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Hide scrollbar but keep functionality */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari & Opera */
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.my-1 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+.my-2 { margin-top: 1rem; margin-bottom: 1rem; }
+.my-3 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+
+/* Add styles for the 3D background and page effects */
+.tarot-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: var(--background);
 } 

@@ -1,134 +1,131 @@
 import React, { useRef, useEffect } from 'react';
-import * as THREE from 'three';
 import styled from 'styled-components';
+import * as THREE from 'three';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useTexture, Sparkles } from '@react-three/drei';
 
-const TarotBackground = () => {
-  const containerRef = useRef(null);
-  const sceneRef = useRef(null);
-  const cameraRef = useRef(null);
-  const rendererRef = useRef(null);
-  const particlesRef = useRef(null);
+// Floating symbols component
+const FloatingSymbols = () => {
+  const { viewport } = useThree();
+  const sparklesRef = useRef();
+  
+  useFrame(({ clock }) => {
+    if (sparklesRef.current) {
+      sparklesRef.current.rotation.y = clock.getElapsedTime() * 0.05;
+    }
+  });
 
+  return (
+    <Sparkles
+      ref={sparklesRef}
+      count={50}
+      scale={[viewport.width * 1.2, viewport.height * 1.2, 10]}
+      size={4}
+      speed={0.3}
+      color="#9b59d9"
+      opacity={0.5}
+    />
+  );
+};
+
+// Background card component
+const BackgroundCard = ({ position, rotation, scale }) => {
+  const meshRef = useRef();
+  const texture = useTexture('/images/cards/m00.jpg');
+  
+  // Card animation
+  useFrame(({ clock }) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.z = Math.sin(clock.getElapsedTime() * 0.2 + position[0]) * 0.1;
+      meshRef.current.position.y = position[1] + Math.sin(clock.getElapsedTime() * 0.3 + position[0]) * 0.2;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} position={position} rotation={rotation} scale={scale}>
+      <planeGeometry args={[1, 1.5]} />
+      <meshBasicMaterial map={texture} transparent opacity={0.15} />
+    </mesh>
+  );
+};
+
+// Animated background that follows mouse movement
+const AnimatedBackground = () => {
+  const groupRef = useRef();
+  const { viewport } = useThree();
+  
+  // React to mouse movement
   useEffect(() => {
-    // Инициализация сцены
-    const initialize = () => {
-      if (!containerRef.current) return;
-      
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      
-      // Создаем сцену
-      const scene = new THREE.Scene();
-      sceneRef.current = scene;
-      
-      // Создаем камеру
-      const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-      camera.position.z = 30;
-      cameraRef.current = camera;
-      
-      // Создаем рендерер
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(window.devicePixelRatio);
-      rendererRef.current = renderer;
-      
-      // Добавляем canvas в DOM
-      containerRef.current.appendChild(renderer.domElement);
-      
-      // Создаем частицы
-      createParticles();
-      
-      // Запускаем анимацию
-      animate();
-      
-      // Обработчик изменения размера окна
-      const handleResize = () => {
-        const newWidth = window.innerWidth;
-        const newHeight = window.innerHeight;
+    const handleMouseMove = (event) => {
+      if (groupRef.current) {
+        const x = (event.clientX / window.innerWidth) * 2 - 1;
+        const y = -(event.clientY / window.innerHeight) * 2 + 1;
         
-        camera.aspect = newWidth / newHeight;
-        camera.updateProjectionMatrix();
-        
-        renderer.setSize(newWidth, newHeight);
-      };
-      
-      window.addEventListener('resize', handleResize);
-      
-      // Очистка
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        if (containerRef.current && renderer.domElement) {
-          containerRef.current.removeChild(renderer.domElement);
-        }
-        scene.clear();
-      };
-    };
-    
-    // Создаем частицы для фона
-    const createParticles = () => {
-      const geometry = new THREE.BufferGeometry();
-      const count = 1500;
-      
-      const positions = new Float32Array(count * 3);
-      const colors = new Float32Array(count * 3);
-      const scales = new Float32Array(count);
-      
-      const color1 = new THREE.Color('#9c88ff');
-      const color2 = new THREE.Color('#8c7ae6');
-      
-      for (let i = 0; i < count; i++) {
-        positions[i * 3] = (Math.random() - 0.5) * 100;
-        positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
-        
-        const mixedColor = color1.clone().lerp(color2, Math.random());
-        colors[i * 3] = mixedColor.r;
-        colors[i * 3 + 1] = mixedColor.g;
-        colors[i * 3 + 2] = mixedColor.b;
-        
-        scales[i] = Math.random();
+        groupRef.current.rotation.x = y * 0.1;
+        groupRef.current.rotation.y = x * 0.1;
       }
-      
-      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-      geometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
-      
-      const material = new THREE.PointsMaterial({
-        size: 0.5,
-        sizeAttenuation: true,
-        transparent: true,
-        opacity: 0.8,
-        vertexColors: true,
-        blending: THREE.AdditiveBlending
-      });
-      
-      const particles = new THREE.Points(geometry, material);
-      sceneRef.current.add(particles);
-      particlesRef.current = particles;
     };
     
-    // Анимация сцены
-    const animate = () => {
-      if (!sceneRef.current || !cameraRef.current || !rendererRef.current || !particlesRef.current) return;
-      
-      particlesRef.current.rotation.x += 0.0005;
-      particlesRef.current.rotation.y += 0.0005;
-      
-      rendererRef.current.render(sceneRef.current, cameraRef.current);
-      
-      requestAnimationFrame(animate);
-    };
-    
-    initialize();
+    window.addEventListener('mousemove', handleMouseMove);
     
     return () => {
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-      }
+      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
   
-  return <BackgroundContainer ref={containerRef} />;
+  // Slow continuous rotation
+  useFrame(({ clock }) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.z = Math.sin(clock.getElapsedTime() * 0.1) * 0.05;
+    }
+  });
+
+  // Create cards at different positions
+  const cards = [];
+  for (let i = 0; i < 8; i++) {
+    const angle = (i / 8) * Math.PI * 2;
+    const radius = 4 + Math.random() * 2;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    const z = -5 - Math.random() * 5;
+    const rotY = Math.random() * Math.PI;
+    const scale = 1 + Math.random() * 0.5;
+    
+    cards.push(
+      <BackgroundCard 
+        key={i}
+        position={[x, y, z]}
+        rotation={[0, rotY, 0]}
+        scale={scale}
+      />
+    );
+  }
+
+  return (
+    <group ref={groupRef}>
+      {cards}
+      <FloatingSymbols />
+      
+      {/* Ambient light for the scene */}
+      <ambientLight intensity={0.5} />
+      
+      {/* Colored point lights for mystical effect */}
+      <pointLight position={[-10, 5, 10]} color="#9b59d9" intensity={2} />
+      <pointLight position={[10, -5, -10]} color="#e63e6d" intensity={1.5} />
+    </group>
+  );
+};
+
+// Main component
+const TarotBackground = () => {
+  return (
+    <BackgroundContainer>
+      <BackgroundGradient />
+      <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+        <AnimatedBackground />
+      </Canvas>
+    </BackgroundContainer>
+  );
 };
 
 const BackgroundContainer = styled.div`
@@ -138,27 +135,21 @@ const BackgroundContainer = styled.div`
   width: 100%;
   height: 100%;
   z-index: -1;
-  pointer-events: none;
-  
-  canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      to bottom,
-      rgba(20, 20, 40, 0.5) 0%,
-      rgba(20, 20, 40, 0.7) 100%
-    );
-  }
+  overflow: hidden;
+`;
+
+const BackgroundGradient = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, 
+    rgba(30, 30, 47, 0.5) 0%, 
+    rgba(18, 18, 31, 0.7) 50%, 
+    rgba(12, 12, 21, 0.9) 100%
+  );
+  z-index: 0;
 `;
 
 export default TarotBackground; 
