@@ -7,10 +7,10 @@ const MobileHeader = () => {
     <HeaderContainer>
       <LogoLink to="/">
         <LogoContainer>
-          <Logo 
-            src="https://i.ibb.co/TDfjvZd/file-75.png" 
-            alt="Таро Инсайт Лого"
-          />
+          <LogoText>
+            <TaroText>TARO</TaroText>
+            <TechText>TECH</TechText>
+          </LogoText>
         </LogoContainer>
       </LogoLink>
     </HeaderContainer>
@@ -43,9 +43,27 @@ const LogoContainer = styled.div`
   justify-content: center;
 `;
 
-const Logo = styled.img`
-  height: 45px;
-  object-fit: contain;
+const LogoText = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+`;
+
+const TaroText = styled.span`
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: 1px;
+`;
+
+const TechText = styled.span`
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 2px;
 `;
 
 export default MobileHeader; 

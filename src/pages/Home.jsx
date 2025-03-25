@@ -66,7 +66,7 @@ const Home = () => {
           className={isMobile ? "float-animation" : ""}
         >
           <HeroImage 
-            src="https://i.ibb.co/TDfjvZd/file-75.png" 
+            src="https://i.ibb.co/TDfjvZdV/file-75.png" 
             alt="Карты Таро" 
             className={isMobile ? "glow-animation" : ""}
           />
@@ -346,7 +346,6 @@ const HeroImage = styled.img`
   max-width: 100%;
   height: auto;
   border-radius: var(--radius);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
   
   @media (max-width: 768px) {
     max-width: 90%;
