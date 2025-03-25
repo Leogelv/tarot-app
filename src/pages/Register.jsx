@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { registerUser, clearAuthError } from '../store/slices/authSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { status, error, isAuthenticated } = useSelector((state) => state.auth);
+  const loading = status === 'loading';
+  
   const [formData, setFormData] = useState({
     name: 'Демо Пользователь',
     email: 'demo@example.com',
@@ -14,8 +17,14 @@ const Register = () => {
     confirmPassword: 'password123',
   });
   
-  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  // Если пользователь авторизован, перенаправляем на профиль
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/profile');
+    }
+  }, [isAuthenticated, navigate]);
   
   useEffect(() => {
     // Clear any previous errors when component mounts
@@ -28,15 +37,32 @@ const Register = () => {
       ...formData,
       [name]: value,
     });
+    
+    // Очищаем ошибки при изменении данных формы
+    if (error) {
+      dispatch(clearAuthError());
+    }
   };
   
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Демо-режим: имитируем успешную регистрацию
-    setLoading(true);
+    if (formData.password !== formData.confirmPassword) {
+      console.error('Пароли не совпадают');
+      return;
+    }
     
-    setTimeout(() => {
+    try {
+      await dispatch(
+        registerUser({
+          email: formData.email,
+          password: formData.password,
+          userData: {
+            name: formData.name
+          }
+        })
+      );
+      
       setSuccess(true);
       
       // Перенаправляем на страницу логина через 2 секунды
@@ -45,7 +71,9 @@ const Register = () => {
           state: { message: 'Регистрация успешна! Теперь вы можете войти.' } 
         });
       }, 2000);
-    }, 1000);
+    } catch (err) {
+      console.error('Ошибка регистрации:', err);
+    }
   };
   
   if (success) {
@@ -69,6 +97,8 @@ const Register = () => {
         <DemoNotice>
           Это демо-версия. Введите любые данные для регистрации.
         </DemoNotice>
+        
+        {error && <ErrorMessage>{error}</ErrorMessage>}
         
         <RegisterForm onSubmit={handleSubmit}>
           <FormGroup>
@@ -317,6 +347,15 @@ const DemoNotice = styled.div`
   font-size: 0.9rem;
   text-align: center;
   border: 1px dashed #1976d2;
+`;
+
+const ErrorMessage = styled.div`
+  background-color: rgba(244, 67, 54, 0.1);
+  color: var(--color-error, #f44336);
+  padding: 1rem;
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
 `;
 
 export default Register; 

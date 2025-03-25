@@ -8,7 +8,8 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { status, error, isAuthenticated } = useSelector((state) => state.auth);
+  const loading = status === 'loading';
   
   const [formData, setFormData] = useState({
     email: 'demo@example.com',
