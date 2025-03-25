@@ -1,258 +1,221 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { getDailyCard, saveDailyReflection } from '../services/supabase/supabaseClient';
+
+// Моковые данные для карты дня
+const mockDailyCard = {
+  id: 7,
+  name: 'Колесница',
+  type: 'major',
+  number: '7',
+  image_url: 'https://www.trustedtarot.com/img/cards/the-chariot.png',
+  description: 'Колесница символизирует силу воли, решимость и победу. Она указывает на преодоление препятствий через самодисциплину и сосредоточенность. Когда Колесница появляется в гадании, она предлагает вам взять под контроль ситуацию и не сдаваться перед трудностями.',
+  keywords: ['движение вперед', 'преодоление препятствий', 'сила воли', 'решимость', 'победа'],
+  meaning_upright: 'Когда Колесница выпадает в прямом положении, она предвещает триумф над препятствиями и движение вперед. Это знак того, что ваша решимость и сила воли приведут вас к успеху. Карта говорит о периоде действия и прогресса, когда вы способны преодолеть любые трудности.',
+  meaning_reversed: 'В перевернутом положении Колесница может указывать на отсутствие направления или контроля в вашей жизни. Она предупреждает о возможных препятствиях и задержках, а также о риске агрессивности или доминирования окружающих. Это призыв к более внимательному управлению своими эмоциями и энергией.'
+};
 
 const DailyCard = () => {
-  const { user } = useSelector(state => state.auth);
   const [card, setCard] = useState(null);
-  const [reflection, setReflection] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [savingReflection, setSavingReflection] = useState(false);
-  const [reflectionSaved, setReflectionSaved] = useState(false);
-  const [cardFlipped, setCardFlipped] = useState(false);
-  
-  const today = new Date();
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [reflection, setReflection] = useState('');
+  const [saveLoading, setSaveLoading] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   
   useEffect(() => {
+    // Имитация загрузки карты дня
     const fetchDailyCard = async () => {
       try {
         setLoading(true);
+        // Имитация задержки сети
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        if (user) {
-          const { data, error } = await getDailyCard(user.id, today);
-          
-          if (error) {
-            throw new Error(error.message);
-          }
-          
-          if (data) {
-            setCard(data.cards);
-            setReflection(data.reflection || '');
-          } else {
-            // Случайная карта из таро
-            const randomMajorNumber = Math.floor(Math.random() * 22).toString().padStart(2, '0');
-            setCard({
-              id: parseInt(randomMajorNumber),
-              name: getMajorArcanaTitleByNumber(randomMajorNumber),
-              type: 'major',
-              number: randomMajorNumber,
-              upright_meaning: 'Значение карты сегодня особенно важно для вашего пути.',
-              description: 'Эта карта выбрана специально для вас на сегодня. Изучите ее значение и как оно резонирует с вашей жизнью.',
-              image_url: `/images/cards/m${randomMajorNumber}.jpg`,
-            });
-          }
-        } else {
-          // Демо-карта для не вошедших пользователей
-          const randomMajorNumber = Math.floor(Math.random() * 22).toString().padStart(2, '0');
-          setCard({
-            id: parseInt(randomMajorNumber),
-            name: getMajorArcanaTitleByNumber(randomMajorNumber),
-            type: 'major',
-            number: randomMajorNumber,
-            upright_meaning: 'Значение карты сегодня особенно важно для вашего пути.',
-            description: 'Эта карта выбрана специально для вас на сегодня. Изучите ее значение и как оно резонирует с вашей жизнью.',
-            image_url: `/images/cards/m${randomMajorNumber}.jpg`,
-          });
-        }
-        
-        // Имитируем задержку для красивой анимации
-        setTimeout(() => {
-          setLoading(false);
-          // Автоматический флип после загрузки
-          setTimeout(() => {
-            setCardFlipped(true);
-          }, 500);
-        }, 1500);
+        // Для демо используем моковые данные
+        setCard(mockDailyCard);
       } catch (err) {
         console.error('Error fetching daily card:', err);
-        setError('Не удалось получить вашу карту дня. Пожалуйста, попробуйте позже.');
+        setError('Не удалось загрузить карту дня. Пожалуйста, попробуйте позже.');
+      } finally {
         setLoading(false);
       }
     };
     
     fetchDailyCard();
-  }, [user, today]);
-  
-  // Получаем название карты Старшего Аркана по номеру
-  const getMajorArcanaTitleByNumber = (number) => {
-    const majorArcanaTitles = {
-      "00": "Шут",
-      "01": "Маг",
-      "02": "Верховная Жрица",
-      "03": "Императрица",
-      "04": "Император",
-      "05": "Иерофант",
-      "06": "Влюбленные",
-      "07": "Колесница",
-      "08": "Сила",
-      "09": "Отшельник",
-      "10": "Колесо Фортуны",
-      "11": "Справедливость",
-      "12": "Повешенный",
-      "13": "Смерть",
-      "14": "Умеренность",
-      "15": "Дьявол",
-      "16": "Башня",
-      "17": "Звезда",
-      "18": "Луна",
-      "19": "Солнце",
-      "20": "Суд",
-      "21": "Мир"
-    };
-    
-    return majorArcanaTitles[number] || `Карта ${number}`;
-  };
+  }, []);
   
   const handleSaveReflection = async () => {
-    if (!user) {
-      setError('Вы должны войти в систему, чтобы сохранить размышления');
-      return;
-    }
+    if (!reflection.trim()) return;
     
     try {
-      setSavingReflection(true);
+      setSaveLoading(true);
+      // Имитируем сохранение на сервере
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const { error } = await saveDailyReflection(user.id, card.id, reflection);
-      
-      if (error) {
-        throw new Error(error.message);
-      }
-      
-      setReflectionSaved(true);
-      setTimeout(() => setReflectionSaved(false), 3000);
+      // Для демонстрации просто показываем успешное сохранение
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       console.error('Error saving reflection:', err);
-      setError('Не удалось сохранить ваше размышление. Пожалуйста, попробуйте еще раз.');
+      alert('Не удалось сохранить вашу запись. Пожалуйста, попробуйте позже.');
     } finally {
-      setSavingReflection(false);
+      setSaveLoading(false);
     }
   };
   
-  const formatDate = (date) => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('ru-RU', options);
-  };
-  
-  const handleCardClick = () => {
-    if (!loading) {
-      setCardFlipped(!cardFlipped);
-    }
-  };
-
-  if (loading) {
-    return (
-      <Container>
-        <DailyCardHeader>
-          <HeaderDate>{formatDate(today)}</HeaderDate>
-          <HeaderTitle>Ваша Карта Дня</HeaderTitle>
-          <HeaderSubtitle>Мудрость и руководство на день</HeaderSubtitle>
-        </DailyCardHeader>
-        <LoadingContainer>
-          <LoadingCard>
-            <LoadingCardFront />
-            <LoadingCardBack />
-          </LoadingCard>
-          <p>Тасуем колоду для вашей ежедневной карты...</p>
-        </LoadingContainer>
-      </Container>
-    );
-  }
-
   return (
-    <Container>
+    <PageContainer className="page-container">
       <BlobBackground>
         <Blob className="blob-1" />
         <Blob className="blob-2" />
         <Blob className="blob-3" />
       </BlobBackground>
       
-      <DailyCardHeader>
-        <HeaderDate>{formatDate(today)}</HeaderDate>
-        <HeaderTitle>Ваша Карта Дня</HeaderTitle>
-        <HeaderSubtitle>Мудрость и руководство на день</HeaderSubtitle>
-      </DailyCardHeader>
+      <PageHeader>
+        <PageTitle>Карта дня</PageTitle>
+        <PageDescription>
+          Ваше ежедневное таро-руководство для размышлений и осознания
+        </PageDescription>
+      </PageHeader>
+      
+      {loading && (
+        <LoadingContainer>
+          <div className="loading-spinner"></div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Тасуем колоду и выбираем вашу карту дня...
+          </motion.p>
+        </LoadingContainer>
+      )}
       
       {error && (
-        <ErrorMessage>{error}</ErrorMessage>
+        <ErrorMessage>
+          <span className="material-symbols-rounded">error</span>
+          {error}
+        </ErrorMessage>
       )}
       
-      {reflectionSaved && (
-        <SuccessMessage>Ваше размышление сохранено!</SuccessMessage>
-      )}
-      
-      <CardSection>
-        <CardImageWrapper>
-          <CardFlipContainer onClick={handleCardClick} $flipped={cardFlipped}>
-            <CardFront>
-              <CardPattern>
-                <span>Нажмите, чтобы перевернуть</span>
-              </CardPattern>
-            </CardFront>
-            <CardBack>
-              <CardImage 
-                src={card?.image_url} 
-                alt={card?.name} 
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = `/images/cards/m00.jpg`;
-                }}
+      {!loading && !error && card && (
+        <ContentContainer>
+          <CardSection>
+            <CardContainer
+              as={motion.div}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              onClick={() => setIsFlipped(!isFlipped)}
+              className="animated-float"
+            >
+              <CardInner $isFlipped={isFlipped}>
+                <CardFront>
+                  <CardImage 
+                    src={card.image_url} 
+                    alt={card.name}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'https://via.placeholder.com/500x800?text=Таро';
+                    }}
+                  />
+                  <CardGlow />
+                </CardFront>
+                <CardBack>
+                  <CardTitle>{card.name}</CardTitle>
+                  <CardNumber>{card.number}</CardNumber>
+                  <CardKeywords>
+                    {card.keywords.map((keyword, index) => (
+                      <Keyword key={index}>{keyword}</Keyword>
+                    ))}
+                  </CardKeywords>
+                  <CardText>
+                    <strong>Значение:</strong> {card.description}
+                  </CardText>
+                  <CardText>
+                    <strong>В прямом положении:</strong> {card.meaning_upright}
+                  </CardText>
+                  <CardText>
+                    <strong>В перевернутом положении:</strong> {card.meaning_reversed}
+                  </CardText>
+                </CardBack>
+              </CardInner>
+              <FlipHint>Нажмите, чтобы {isFlipped ? 'увидеть карту' : 'прочитать значение'}</FlipHint>
+            </CardContainer>
+          </CardSection>
+          
+          <InfoSection
+            as={motion.div}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <TodayInfo className="glass-card">
+              <SectionTitle>Ваша карта на {new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</SectionTitle>
+              <CardName>{card.name}</CardName>
+              <CardType>{card.type === 'major' ? 'Старший Аркан' : 'Младший Аркан'} • {card.number}</CardType>
+              <CardDescription>{card.description.substring(0, 150)}...</CardDescription>
+              <CardMessage>
+                <MessageTitle>Послание для вас:</MessageTitle>
+                <Message>
+                  Карта Колесница приглашает вас взять под контроль ситуацию и двигаться вперед с уверенностью. 
+                  Сегодня благоприятный день для проявления силы воли и решимости. 
+                  Не позволяйте препятствиям останавливать вас — у вас есть все необходимые качества для их преодоления.
+                </Message>
+              </CardMessage>
+            </TodayInfo>
+            
+            <ReflectionSection className="glass-card">
+              <SectionTitle>Ваши размышления</SectionTitle>
+              <ReflectionPrompt>
+                Запишите, какие мысли и чувства вызывает у вас эта карта. Как её значение резонирует с вашей текущей ситуацией?
+              </ReflectionPrompt>
+              <ReflectionInput
+                placeholder="Запишите ваши мысли здесь..."
+                value={reflection}
+                onChange={(e) => setReflection(e.target.value)}
+                rows={5}
               />
-            </CardBack>
-          </CardFlipContainer>
-        </CardImageWrapper>
-        
-        <CardContent>
-          <CardName>{card?.name}</CardName>
-          <CardType>
-            {card?.type === 'major' 
-              ? `Старший Аркан - ${card.number ? `Аркан ${parseInt(card.number)}` : ''}` 
-              : `${card?.suit ? card.suit.charAt(0).toUpperCase() + card.suit.slice(1) : ''} - ${card?.number || ''}`}
-          </CardType>
-          
-          <CardMeaning className="glass-card">
-            <SectionTitle>Значение на Сегодня</SectionTitle>
-            <p>{card?.upright_meaning || 'Нет доступного значения.'}</p>
-          </CardMeaning>
-          
-          <CardDescription className="glass-card">
-            <SectionTitle>Описание Карты</SectionTitle>
-            <p>{card?.description || 'Нет доступного описания.'}</p>
-          </CardDescription>
-          
-          <ReflectionSection className="neo-card">
-            <SectionTitle>Ваше Размышление</SectionTitle>
-            <ReflectionText 
-              value={reflection} 
-              onChange={(e) => setReflection(e.target.value)}
-              placeholder="Запишите свои мысли о сегодняшней карте и как она относится к вашему дню..."
-              rows={5}
-            />
-            <ReflectionActions>
               <SaveButton 
+                onClick={handleSaveReflection}
+                disabled={saveLoading || !reflection.trim()}
                 as={motion.button}
-                onClick={handleSaveReflection} 
-                disabled={savingReflection}
                 whileTap={{ scale: 0.95 }}
               >
-                {savingReflection ? 'Сохранение...' : 'Сохранить Размышление'}
+                {saveLoading ? (
+                  <>
+                    <span className="spinner"></span>
+                    Сохранение...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-rounded">save</span>
+                    Сохранить
+                  </>
+                )}
               </SaveButton>
-              <ViewCardLink to={`/cards/${card?.id || card?.number}`}>Полная Информация о Карте</ViewCardLink>
-            </ReflectionActions>
-          </ReflectionSection>
-        </CardContent>
-      </CardSection>
-    </Container>
+              
+              {saveSuccess && (
+                <SuccessMessage>
+                  <span className="material-symbols-rounded">check_circle</span>
+                  Ваши размышления сохранены!
+                </SuccessMessage>
+              )}
+            </ReflectionSection>
+          </InfoSection>
+        </ContentContainer>
+      )}
+    </PageContainer>
   );
 };
 
-const Container = styled.div`
-  max-width: 1000px;
+// Styled Components
+const PageContainer = styled.div`
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 2rem 1.5rem;
   position: relative;
 `;
 
@@ -283,7 +246,7 @@ const Blob = styled.div`
   }
   
   &.blob-2 {
-    bottom: 10%;
+    bottom: 20%;
     right: 15%;
     width: 250px;
     height: 250px;
@@ -293,8 +256,8 @@ const Blob = styled.div`
   }
   
   &.blob-3 {
-    top: 60%;
-    left: 40%;
+    top: 50%;
+    left: 50%;
     width: 200px;
     height: 200px;
     background: var(--tertiary);
@@ -303,218 +266,20 @@ const Blob = styled.div`
   }
 `;
 
-const DailyCardHeader = styled.header`
+const PageHeader = styled.header`
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 2.5rem;
 `;
 
-const HeaderDate = styled.p`
-  font-size: 1.1rem;
-  color: var(--primary);
-  margin-bottom: 10px;
+const PageTitle = styled.h1`
+  margin-bottom: 0.5rem;
 `;
 
-const HeaderTitle = styled.h1`
-  margin-bottom: 10px;
-`;
-
-const HeaderSubtitle = styled.p`
-  font-size: 1.2rem;
-`;
-
-const CardSection = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 40px;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const CardImageWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  perspective: 1000px;
-`;
-
-const CardFlipContainer = styled.div`
-  width: 100%;
-  max-width: 300px;
-  aspect-ratio: 2/3;
-  position: relative;
-  transition: transform 0.8s;
-  transform-style: preserve-3d;
-  cursor: pointer;
-  transform: ${props => props.$flipped ? 'rotateY(180deg)' : 'rotateY(0deg)'};
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
-  animation: float 6s ease-in-out infinite;
-`;
-
-const CardSide = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: var(--card-shadow);
-`;
-
-const CardFront = styled(CardSide)`
-  background: var(--gradient-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const CardPattern = styled.div`
-  width: 100%;
-  height: 100%;
-  background-image: url('/images/card-back-pattern.png'), linear-gradient(145deg, var(--primary-dark), var(--primary));
-  background-size: 60px 60px, cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  
-  span {
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
-    padding: 8px 16px;
-    border-radius: var(--radius-full);
-    font-size: 0.8rem;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  
-  ${CardFlipContainer}:hover & span {
-    opacity: 1;
-  }
-`;
-
-const CardBack = styled(CardSide)`
-  transform: rotateY(180deg);
-`;
-
-const CardImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-`;
-
-const CardContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-`;
-
-const CardName = styled.h2`
-  margin-bottom: 5px;
-`;
-
-const CardType = styled.p`
+const PageDescription = styled.p`
   font-size: 1.1rem;
   color: var(--text-secondary);
-  margin-bottom: 20px;
-`;
-
-const CardMeaning = styled.div`
-  padding: 1.8rem;
-`;
-
-const CardDescription = styled.div`
-  padding: 1.8rem;
-`;
-
-const SectionTitle = styled.h3`
-  margin-bottom: 15px;
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: -5px;
-    width: 50px;
-    height: 3px;
-    background: var(--gradient-primary);
-    border-radius: 3px;
-  }
-`;
-
-const ReflectionSection = styled.div`
-  margin-top: 10px;
-`;
-
-const ReflectionText = styled.textarea`
-  width: 100%;
-  background: rgba(26, 30, 58, 0.3);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius);
-  padding: 15px;
-  color: var(--text);
-  font-family: var(--font-body);
-  resize: vertical;
-  min-height: 120px;
-  margin-bottom: 20px;
-  
-  &:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(155, 89, 217, 0.2);
-  }
-  
-  &::placeholder {
-    color: var(--text-secondary);
-    opacity: 0.6;
-  }
-`;
-
-const ReflectionActions = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-`;
-
-const SaveButton = styled.button`
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-full);
-  padding: 12px 25px;
-  font-family: var(--font-heading);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-  font-weight: 500;
-  box-shadow: 0 4px 15px rgba(155, 89, 217, 0.3);
-  
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 7px 20px rgba(155, 89, 217, 0.5);
-  }
-  
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-`;
-
-const ViewCardLink = styled(Link)`
-  color: var(--primary);
-  font-size: 0.95rem;
-  transition: color 0.3s ease;
-  
-  &:hover {
-    color: var(--primary-light);
-  }
+  max-width: 600px;
+  margin: 0 auto;
 `;
 
 const LoadingContainer = styled.div`
@@ -522,63 +287,346 @@ const LoadingContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 0;
+  min-height: 300px;
+  gap: 1.5rem;
   
   p {
-    margin-top: 25px;
+    margin-top: 1rem;
     color: var(--text-secondary);
   }
 `;
 
-const LoadingCard = styled.div`
-  width: 240px;
-  height: 360px;
+const ErrorMessage = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(255, 76, 76, 0.1);
+  border: 1px solid rgba(255, 76, 76, 0.3);
+  border-radius: var(--radius);
+  color: #ff4c4c;
+  margin: 2rem auto;
+  max-width: 500px;
+  
+  .material-symbols-rounded {
+    font-size: 20px;
+  }
+`;
+
+const ContentContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const CardSection = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const CardContainer = styled.div`
+  width: 300px;
+  height: 450px;
   position: relative;
   perspective: 1000px;
-  animation: float 3s ease-in-out infinite;
+  cursor: pointer;
 `;
 
-const LoadingCardFront = styled.div`
+const CardInner = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s;
+  transform: ${props => props.$isFlipped ? 'rotateY(180deg)' : 'rotateY(0)'};
+`;
+
+const CardFront = styled.div`
   position: absolute;
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: 10px;
-  background: var(--gradient-card);
-  background-size: 60px 60px, cover;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  animation: pulse 1.5s ease-in-out infinite;
-`;
-
-const LoadingCardBack = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  border-radius: 10px;
-  background: linear-gradient(145deg, var(--primary-dark), var(--primary));
-  transform: rotateY(180deg);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-`;
-
-const ErrorMessage = styled.div`
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #ff6b6b;
-  padding: 1rem;
   border-radius: var(--radius);
-  margin-bottom: 2rem;
+  overflow: hidden;
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+`;
+
+const CardBack = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+  
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+  }
+`;
+
+const CardImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+`;
+
+const CardGlow = styled.div`
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(155, 89, 217, 0.2) 45%,
+    rgba(109, 82, 209, 0.4) 50%,
+    rgba(155, 89, 217, 0.2) 55%,
+    transparent 100%
+  );
+  opacity: 0.5;
+  mix-blend-mode: screen;
+  transition: opacity 0.5s ease;
+  
+  ${CardContainer}:hover & {
+    opacity: 0.8;
+  }
+`;
+
+const CardTitle = styled.h3`
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
   text-align: center;
-  border: 1px solid rgba(220, 53, 69, 0.2);
+  color: var(--primary);
+`;
+
+const CardNumber = styled.div`
+  width: 30px;
+  height: 30px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-weight: 600;
+`;
+
+const CardKeywords = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+`;
+
+const Keyword = styled.span`
+  padding: 0.3rem 0.6rem;
+  background: rgba(109, 82, 209, 0.1);
+  border: 1px solid rgba(109, 82, 209, 0.2);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  color: var(--primary-light);
+`;
+
+const CardText = styled.p`
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+  
+  strong {
+    color: var(--primary-light);
+  }
+`;
+
+const FlipHint = styled.div`
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  
+  ${CardContainer}:hover & {
+    opacity: 1;
+  }
+`;
+
+const InfoSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+`;
+
+const TodayInfo = styled.div`
+  padding: 1.5rem;
+`;
+
+const CardName = styled.h2`
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const CardType = styled.div`
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+`;
+
+const CardDescription = styled.p`
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+`;
+
+const CardMessage = styled.div`
+  background: rgba(155, 89, 217, 0.05);
+  border-left: 3px solid var(--primary);
+  padding: 1rem;
+  border-radius: 0 var(--radius) var(--radius) 0;
+`;
+
+const MessageTitle = styled.h4`
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary);
+`;
+
+const Message = styled.p`
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text);
+`;
+
+const ReflectionSection = styled.div`
+  padding: 1.5rem;
+`;
+
+const SectionTitle = styled.h3`
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--radius);
+  }
+`;
+
+const ReflectionPrompt = styled.p`
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+`;
+
+const ReflectionInput = styled.textarea`
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  resize: vertical;
+  margin-bottom: 1rem;
+  min-height: 120px;
+  font-family: var(--font-body);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(155, 89, 217, 0.1);
+  }
+  
+  &::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.5;
+  }
+`;
+
+const SaveButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--primary-light);
+    transform: translateY(-2px);
+  }
+  
+  &:disabled {
+    background: #474747;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .material-symbols-rounded {
+    font-size: 1.2rem;
+  }
+  
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
 `;
 
 const SuccessMessage = styled.div`
-  background-color: rgba(40, 167, 69, 0.1);
-  color: #2ecc71;
-  padding: 1rem;
-  border-radius: var(--radius);
-  margin-bottom: 2rem;
-  text-align: center;
-  border: 1px solid rgba(40, 167, 69, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  color: #4cd964;
+  
+  .material-symbols-rounded {
+    font-size: 1.2rem;
+  }
 `;
 
 export default DailyCard; 

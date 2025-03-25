@@ -9,58 +9,58 @@ const Footer = () => {
     <FooterContainer>
       <FooterContent>
         <FooterSection>
-          <FooterLogo>✨ Tarot Insights</FooterLogo>
-          <FooterTagline>Discover your path through ancient wisdom</FooterTagline>
+          <FooterLogo>✨ Таро Инсайт</FooterLogo>
+          <FooterTagline>Откройте свой путь с помощью древней мудрости</FooterTagline>
           <SocialLinks>
-            <SocialLink href="https://twitter.com/tarotinsights" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-twitter"></i>
+            <SocialLink href="https://t.me/taroinsight" target="_blank" rel="noopener noreferrer">
+              <i className="material-symbols-rounded">send</i>
             </SocialLink>
-            <SocialLink href="https://instagram.com/tarotinsights" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-instagram"></i>
+            <SocialLink href="https://vk.com/taroinsight" target="_blank" rel="noopener noreferrer">
+              <i className="material-symbols-rounded">public</i>
             </SocialLink>
-            <SocialLink href="https://facebook.com/tarotinsights" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-facebook-f"></i>
+            <SocialLink href="https://wa.me/taroinsight" target="_blank" rel="noopener noreferrer">
+              <i className="material-symbols-rounded">chat</i>
             </SocialLink>
           </SocialLinks>
         </FooterSection>
         
         <FooterSection>
-          <FooterSectionTitle>Quick Links</FooterSectionTitle>
+          <FooterSectionTitle>Быстрые ссылки</FooterSectionTitle>
           <FooterLinks>
-            <FooterLink to="/">Home</FooterLink>
-            <FooterLink to="/about">About</FooterLink>
-            <FooterLink to="/card-library">Card Library</FooterLink>
-            <FooterLink to="/spreads">Spreads</FooterLink>
-            <FooterLink to="/daily-card">Daily Card</FooterLink>
+            <FooterLink to="/">Главная</FooterLink>
+            <FooterLink to="/about">О нас</FooterLink>
+            <FooterLink to="/cards">Карты</FooterLink>
+            <FooterLink to="/spreads">Расклады</FooterLink>
+            <FooterLink to="/daily-card">Карта дня</FooterLink>
           </FooterLinks>
         </FooterSection>
         
         <FooterSection>
-          <FooterSectionTitle>Resources</FooterSectionTitle>
+          <FooterSectionTitle>Ресурсы</FooterSectionTitle>
           <FooterLinks>
-            <FooterLink to="/blog">Blog</FooterLink>
-            <FooterLink to="/learn">Learn Tarot</FooterLink>
-            <FooterLink to="/faq">FAQ</FooterLink>
-            <FooterLink to="/contact">Contact Us</FooterLink>
+            <FooterLink to="/blog">Блог</FooterLink>
+            <FooterLink to="/learn">Изучение Таро</FooterLink>
+            <FooterLink to="/faq">Вопросы и ответы</FooterLink>
+            <FooterLink to="/contact">Связаться с нами</FooterLink>
           </FooterLinks>
         </FooterSection>
         
         <FooterSection>
-          <FooterSectionTitle>Legal</FooterSectionTitle>
+          <FooterSectionTitle>Правовая информация</FooterSectionTitle>
           <FooterLinks>
-            <FooterLink to="/terms">Terms of Service</FooterLink>
-            <FooterLink to="/privacy">Privacy Policy</FooterLink>
-            <FooterLink to="/cookies">Cookie Policy</FooterLink>
+            <FooterLink to="/terms">Условия использования</FooterLink>
+            <FooterLink to="/privacy">Политика конфиденциальности</FooterLink>
+            <FooterLink to="/cookies">Политика cookies</FooterLink>
           </FooterLinks>
         </FooterSection>
       </FooterContent>
       
       <FooterBottom>
         <Copyright>
-          &copy; {currentYear} Tarot Insights. All rights reserved.
+          &copy; {currentYear} Таро Инсайт. Все права защищены.
         </Copyright>
         <Disclaimer>
-          For entertainment purposes only. Not a substitute for professional advice.
+          Только для развлекательных целей. Не является заменой профессиональной консультации.
         </Disclaimer>
       </FooterBottom>
     </FooterContainer>
@@ -69,10 +69,10 @@ const Footer = () => {
 
 // Styled Components
 const FooterContainer = styled.footer`
-  background-color: var(--color-primary);
-  color: white;
+  background-color: var(--background-secondary);
+  color: var(--text);
   padding: 3rem 1rem 1.5rem;
-  margin-top: 3rem;
+  border-top: 1px solid var(--border);
 `;
 
 const FooterContent = styled.div`
@@ -99,13 +99,17 @@ const FooterSection = styled.div`
 const FooterLogo = styled.h2`
   font-size: 1.5rem;
   margin-bottom: 0.75rem;
-  color: white;
+  color: var(--text);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 `;
 
 const FooterTagline = styled.p`
   font-size: 0.9rem;
   margin-bottom: 1rem;
-  opacity: 0.9;
+  color: var(--text-secondary);
 `;
 
 const SocialLinks = styled.div`
@@ -115,19 +119,23 @@ const SocialLinks = styled.div`
 `;
 
 const SocialLink = styled.a`
-  color: white;
-  font-size: 1.2rem;
-  transition: opacity 0.3s ease;
+  color: var(--text);
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
   
   &:hover {
-    opacity: 0.8;
+    color: var(--primary);
+  }
+  
+  .material-symbols-rounded {
+    font-size: 1.5rem;
   }
 `;
 
 const FooterSectionTitle = styled.h3`
   font-size: 1.1rem;
   margin-bottom: 1rem;
-  color: white;
+  color: var(--text);
   position: relative;
   padding-bottom: 0.5rem;
   
@@ -138,7 +146,7 @@ const FooterSectionTitle = styled.h3`
     bottom: 0;
     width: 40px;
     height: 2px;
-    background-color: var(--color-secondary);
+    background: var(--gradient-primary);
   }
 `;
 
@@ -149,13 +157,17 @@ const FooterLinks = styled.div`
 `;
 
 const FooterLink = styled(Link)`
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-secondary);
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.3s ease;
   
   &:hover {
-    color: var(--color-secondary-light);
+    color: var(--primary);
+  }
+  
+  &::after {
+    display: none;
   }
 `;
 
@@ -163,7 +175,7 @@ const FooterBottom = styled.div`
   max-width: 1200px;
   margin: 2rem auto 0;
   padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border);
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -177,12 +189,12 @@ const FooterBottom = styled.div`
 
 const Copyright = styled.p`
   font-size: 0.85rem;
-  opacity: 0.8;
+  color: var(--text-secondary);
 `;
 
 const Disclaimer = styled.p`
   font-size: 0.85rem;
-  opacity: 0.8;
+  color: var(--text-secondary);
   
   @media (max-width: 768px) {
     margin-top: 0.5rem;

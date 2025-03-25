@@ -1,87 +1,75 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
+import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const MobileNavbar = () => {
+  // Навигационные элементы
+  const navItems = [
+    { path: '/', icon: 'home', label: 'Главная', exact: true },
+    { path: '/cards', icon: 'style', label: 'Карты' },
+    { path: '/daily-card', icon: 'today', label: 'Карта дня' },
+    { path: '/spreads', icon: 'dashboard', label: 'Расклады' },
+    { path: '/profile', icon: 'person', label: 'Профиль' }
+  ];
+  
   return (
     <NavbarContainer>
-      <NavItems>
-        <NavItem to="/">
-          <span className="material-symbols-rounded">home</span>
-          <span>Главная</span>
+      {navItems.map((item, index) => (
+        <NavItem 
+          key={index}
+          to={item.path}
+          end={item.exact}
+          as={motion.div}
+          whileHover={{ y: -3 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <span className="material-symbols-outlined">{item.icon}</span>
+          <NavLabel>{item.label}</NavLabel>
         </NavItem>
-        <NavItem to="/cards">
-          <span className="material-symbols-rounded">style</span>
-          <span>Карты</span>
-        </NavItem>
-        <NavItem to="/daily-card">
-          <span className="material-symbols-rounded">auto_awesome</span>
-          <span>Карта дня</span>
-        </NavItem>
-        <NavItem to="/spreads">
-          <span className="material-symbols-rounded">dashboard</span>
-          <span>Расклады</span>
-        </NavItem>
-        <NavItem to="/profile">
-          <span className="material-symbols-rounded">person</span>
-          <span>Профиль</span>
-        </NavItem>
-      </NavItems>
+      ))}
     </NavbarContainer>
   );
 };
 
-const NavbarContainer = styled.nav`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 65px;
-  background: rgba(9, 11, 26, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-top: 1px solid var(--border);
-  z-index: 100;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-`;
-
-const NavItems = styled.div`
+const NavbarContainer = styled.div`
   display: flex;
   justify-content: space-around;
   align-items: center;
-  height: 100%;
-  padding: 0 10px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(9, 11, 26, 0.8);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 0;
+  z-index: 1000;
 `;
 
 const NavItem = styled(NavLink)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
+  padding: 8px 0;
   text-decoration: none;
-  font-size: 0.7rem;
-  padding: 5px;
-  border-radius: var(--radius);
-  transition: all 0.3s ease;
-  position: relative;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
   
-  &.active {
-    color: var(--primary);
-  }
-  
-  &::after {
-    display: none;
-  }
-  
-  .material-symbols-rounded {
+  span {
     font-size: 1.5rem;
     margin-bottom: 3px;
   }
   
-  &:hover {
+  &.active {
     color: var(--primary);
   }
+`;
+
+const NavLabel = styled.div`
+  font-size: 0.75rem;
+  font-weight: 500;
 `;
 
 export default MobileNavbar; 

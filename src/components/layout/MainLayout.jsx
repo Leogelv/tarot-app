@@ -40,14 +40,14 @@ const MainLayout = () => {
       window.removeEventListener('resize', checkDeviceType);
     };
   }, [isMobile]);
-
+  
   return (
-    <LayoutContainer>
-      {isMobile && <TarotBackground />}
+    <LayoutContainer className="layout-container">
+      <TarotBackground />
       
       {isMobile ? <MobileHeader /> : <Navbar />}
       
-      <MainContent $isMobile={isMobile}>
+      <MainContent className="main-content" $isMobile={isMobile}>
         <AnimatePresence mode="wait">
           <PageTransition key={location.pathname}>
             <Outlet />
@@ -65,6 +65,7 @@ const LayoutContainer = styled.div`
   flex-direction: column;
   min-height: 100vh;
   position: relative;
+  background-color: var(--background);
 `;
 
 const MainContent = styled.main`
@@ -73,6 +74,7 @@ const MainContent = styled.main`
   width: 100%;
   max-width: 100vw;
   position: relative;
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
 `;
 
 export default MainLayout; 

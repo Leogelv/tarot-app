@@ -5,12 +5,57 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { getSpreads } from '../services/supabase/supabaseClient';
 
+// Моковые данные раскладов
+const mockSpreads = [
+  {
+    id: 1,
+    name: 'Расклад на три карты',
+    description: 'Классический расклад: прошлое, настоящее и будущее. Простой способ получить быстрое понимание ситуации.',
+    cards_count: 3,
+    difficulty: 'easy',
+    image_url: 'https://i.ibb.co/mG0SrM8/three-card-spread.jpg'
+  },
+  {
+    id: 2,
+    name: 'Кельтский крест',
+    description: 'Один из самых популярных и информативных раскладов, дающий детальный анализ ситуации с разных сторон.',
+    cards_count: 10,
+    difficulty: 'advanced',
+    image_url: 'https://i.ibb.co/9vHzp9S/celtic-cross.jpg'
+  },
+  {
+    id: 3,
+    name: 'Расклад на любовь',
+    description: 'Расклад для анализа любовных отношений и романтических перспектив с партнером.',
+    cards_count: 5,
+    difficulty: 'medium',
+    image_url: 'https://i.ibb.co/wWn6JXc/love-spread.jpg'
+  },
+  {
+    id: 4,
+    name: 'Расклад на решение',
+    description: 'Помогает принять решение, рассматривая альтернативные пути и потенциальные результаты каждого варианта.',
+    cards_count: 4,
+    difficulty: 'medium',
+    image_url: 'https://i.ibb.co/9G0SBFY/decision-spread.jpg'
+  },
+  {
+    id: 5,
+    name: 'Расклад на месяц',
+    description: 'Прогноз на предстоящий месяц с рекомендациями для каждой недели.',
+    cards_count: 5,
+    difficulty: 'medium',
+    image_url: 'https://i.ibb.co/njvvqpr/month-ahead.jpg'
+  }
+];
+
 const Spreads = () => {
   const { isSubscribed } = useSelector(state => state.auth);
   const [spreads, setSpreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
+  const [filter, setFilter] = useState('all');
   
   useEffect(() => {
     const fetchSpreads = async () => {
@@ -28,128 +73,7 @@ const Spreads = () => {
           setSpreads(data);
         } else {
           // Demo spreads if no data from API
-          setSpreads([
-            {
-              id: 1,
-              name: 'Прошлое, Настоящее, Будущее',
-              description: 'Простой расклад из 3 карт, дающий понимание вашей ситуации во времени.',
-              cards_count: 3,
-              image_url: '/images/spreads/past-present-future.jpg',
-              is_premium: false,
-              position_preview: ['Прошлое', 'Настоящее', 'Будущее'],
-              layout: {
-                type: 'line',
-                positions: [
-                  { x: 25, y: 50 },
-                  { x: 50, y: 50 },
-                  { x: 75, y: 50 }
-                ]
-              }
-            },
-            {
-              id: 2,
-              name: 'Кельтский Крест',
-              description: 'Комплексный расклад из 10 карт, который дает подробный обзор вашей ситуации.',
-              cards_count: 10,
-              image_url: '/images/spreads/celtic-cross.jpg',
-              is_premium: false,
-              position_preview: ['Настоящее', 'Вызов', 'Прошлое', 'Будущее', 'Цель', 'Подсознание', 
-                                'Совет', 'Влияние', 'Надежды/Страхи', 'Исход'],
-              layout: {
-                type: 'cross',
-                positions: [
-                  { x: 50, y: 50 }, // center
-                  { x: 65, y: 50 }, // crossing
-                  { x: 30, y: 50 }, // below
-                  { x: 50, y: 25 }, // above
-                  { x: 50, y: 75 }, // behind
-                  { x: 80, y: 50 }, // ahead
-                  { x: 25, y: 85 }, // bottom row
-                  { x: 42, y: 85 },
-                  { x: 59, y: 85 },
-                  { x: 76, y: 85 }
-                ]
-              }
-            },
-            {
-              id: 3,
-              name: 'Отношения',
-              description: 'Расклад из 5 карт, дающий представление о динамике и потенциале отношений.',
-              cards_count: 5,
-              image_url: '/images/spreads/relationship.jpg',
-              is_premium: false,
-              position_preview: ['Вы', 'Партнер', 'Связь', 'Вызов', 'Результат'],
-              layout: {
-                type: 'pyramid',
-                positions: [
-                  { x: 35, y: 70 },
-                  { x: 65, y: 70 },
-                  { x: 50, y: 45 },
-                  { x: 35, y: 20 },
-                  { x: 65, y: 20 }
-                ]
-              }
-            },
-            {
-              id: 4,
-              name: 'Карьерный Путь',
-              description: 'Расклад из 6 карт, сосредоточенный на вопросах работы и профессиональной реализации.',
-              cards_count: 6,
-              image_url: '/images/spreads/career.jpg',
-              is_premium: true,
-              position_preview: ['Текущая позиция', 'Препятствие', 'Сильная сторона', 
-                                'Действие', 'Окружение', 'Результат'],
-              layout: {
-                type: 'grid',
-                positions: [
-                  { x: 33, y: 25 },
-                  { x: 67, y: 25 },
-                  { x: 33, y: 50 },
-                  { x: 67, y: 50 },
-                  { x: 33, y: 75 },
-                  { x: 67, y: 75 }
-                ]
-              }
-            },
-            {
-              id: 5,
-              name: 'Разум, Тело, Дух',
-              description: 'Расклад из 3 карт для оценки аспектов вашего целостного благополучия.',
-              cards_count: 3,
-              image_url: '/images/spreads/mind-body-spirit.jpg',
-              is_premium: false,
-              position_preview: ['Разум', 'Тело', 'Дух'],
-              layout: {
-                type: 'triangle',
-                positions: [
-                  { x: 50, y: 15 },
-                  { x: 25, y: 70 },
-                  { x: 75, y: 70 }
-                ]
-              }
-            },
-            {
-              id: 6,
-              name: 'Решение',
-              description: 'Расклад из 6 карт, помогающий выбрать между двумя путями.',
-              cards_count: 6,
-              image_url: '/images/spreads/decision.jpg',
-              is_premium: true,
-              position_preview: ['Текущая ситуация', 'Сознательные желания', 'Подсознательные влияния', 
-                              'Путь А', 'Путь Б', 'Совет'],
-              layout: {
-                type: 'fork',
-                positions: [
-                  { x: 50, y: 15 },
-                  { x: 35, y: 35 },
-                  { x: 65, y: 35 },
-                  { x: 25, y: 70 },
-                  { x: 75, y: 70 },
-                  { x: 50, y: 85 }
-                ]
-              }
-            }
-          ]);
+          setSpreads(mockSpreads);
         }
       } catch (err) {
         console.error('Error fetching spreads:', err);
@@ -164,10 +88,8 @@ const Spreads = () => {
   
   // Фильтрация раскладов в зависимости от выбранной вкладки
   const filteredSpreads = spreads.filter(spread => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'basic') return !spread.is_premium;
-    if (activeTab === 'premium') return spread.is_premium;
-    return true;
+    if (filter === 'all') return true;
+    return spread.difficulty === filter;
   });
   
   // Визуализация макета расклада с мини-картами
@@ -202,47 +124,54 @@ const Spreads = () => {
   };
 
   return (
-    <Container>
+    <SpreadsContainer className="page-container">
       <BlobBackground>
         <Blob className="blob-1" />
         <Blob className="blob-2" />
         <Blob className="blob-3" />
       </BlobBackground>
       
-      <Header>
-        <Title>Таро Расклады</Title>
-        <Subtitle>Откройте различные способы гадания на картах Таро</Subtitle>
-      </Header>
+      <PageHeader>
+        <PageTitle>Расклады Таро</PageTitle>
+        <PageDescription>
+          Выберите расклад для глубокого анализа и понимания вашей ситуации
+        </PageDescription>
+      </PageHeader>
       
-      <TabsContainer>
-        <Tab 
-          onClick={() => setActiveTab('all')} 
-          $active={activeTab === 'all'}
+      <FiltersContainer>
+        <FilterButton 
+          onClick={() => setFilter('all')} 
+          $active={filter === 'all'}
           as={motion.button}
-          whileHover={{ y: -2 }}
           whileTap={{ scale: 0.95 }}
         >
           Все расклады
-        </Tab>
-        <Tab 
-          onClick={() => setActiveTab('basic')} 
-          $active={activeTab === 'basic'}
+        </FilterButton>
+        <FilterButton 
+          onClick={() => setFilter('easy')} 
+          $active={filter === 'easy'}
           as={motion.button}
-          whileHover={{ y: -2 }}
           whileTap={{ scale: 0.95 }}
         >
-          Базовые
-        </Tab>
-        <Tab 
-          onClick={() => setActiveTab('premium')} 
-          $active={activeTab === 'premium'}
+          Простые
+        </FilterButton>
+        <FilterButton 
+          onClick={() => setFilter('medium')} 
+          $active={filter === 'medium'}
           as={motion.button}
-          whileHover={{ y: -2 }}
           whileTap={{ scale: 0.95 }}
         >
-          Премиум
-        </Tab>
-      </TabsContainer>
+          Средние
+        </FilterButton>
+        <FilterButton 
+          onClick={() => setFilter('advanced')} 
+          $active={filter === 'advanced'}
+          as={motion.button}
+          whileTap={{ scale: 0.95 }}
+        >
+          Продвинутые
+        </FilterButton>
+      </FiltersContainer>
       
       {error && (
         <ErrorMessage>{error}</ErrorMessage>
@@ -313,14 +242,14 @@ const Spreads = () => {
           </SpreadCard>
         ))}
       </SpreadsGrid>
-    </Container>
+    </SpreadsContainer>
   );
 };
 
-const Container = styled.div`
+const SpreadsContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 2rem 1.5rem;
   position: relative;
 `;
 
@@ -371,40 +300,43 @@ const Blob = styled.div`
   }
 `;
 
-const Header = styled.header`
+const PageHeader = styled.header`
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 2.5rem;
 `;
 
-const Title = styled.h1`
-  margin-bottom: 10px;
+const PageTitle = styled.h1`
+  margin-bottom: 1rem;
 `;
 
-const Subtitle = styled.p`
-  font-size: 1.2rem;
+const PageDescription = styled.p`
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
 `;
 
-const TabsContainer = styled.div`
+const FiltersContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 30px;
+  margin-bottom: 2.5rem;
 `;
 
-const Tab = styled.button`
-  background: ${props => props.$active ? 'var(--gradient-primary)' : 'rgba(26, 30, 58, 0.5)'};
-  color: ${props => props.$active ? 'white' : 'var(--text)'};
-  border: none;
-  padding: 10px 20px;
+const FilterButton = styled.button`
+  padding: 0.6rem 1.2rem;
+  background: ${props => props.$active ? 'var(--primary)' : 'var(--card-bg)'};
+  color: ${props => props.$active ? 'white' : 'var(--text-secondary)'};
+  border: 1px solid ${props => props.$active ? 'var(--primary)' : 'var(--border)'};
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-family: var(--font-heading);
   font-size: 0.9rem;
-  box-shadow: ${props => props.$active ? '0 5px 15px rgba(155, 89, 217, 0.25)' : 'none'};
+  transition: all 0.3s ease;
   
   &:hover {
-    background: ${props => props.$active ? 'var(--gradient-primary)' : 'rgba(26, 30, 58, 0.8)'};
+    background: ${props => props.$active ? 'var(--primary-light)' : 'var(--card-bg-hover)'};
+    transform: translateY(-3px);
   }
 `;
 

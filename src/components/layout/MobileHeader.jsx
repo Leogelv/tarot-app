@@ -1,53 +1,55 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 
 const MobileHeader = () => {
   return (
     <HeaderContainer>
-      <Logo to="/">
-        <LogoText>Таро Инсайт</LogoText>
-      </Logo>
+      <LogoLink to="/">
+        <LogoContainer>
+          <Logo 
+            src="https://i.ibb.co/TDfjvZd/file-75.png" 
+            alt="Таро Инсайт Лого"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          />
+        </LogoContainer>
+      </LogoLink>
     </HeaderContainer>
   );
 };
 
 const HeaderContainer = styled.header`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 70px;
-  background: rgba(9, 11, 26, 0.8);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
-  z-index: 100;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  padding: 12px 16px;
+  width: 100%;
+  background: rgba(18, 18, 31, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 `;
 
-const Logo = styled(Link)`
+const LogoLink = styled(Link)`
+  text-decoration: none;
+  display: block;
+`;
+
+const LogoContainer = styled.div`
   display: flex;
   align-items: center;
-  text-decoration: none;
-  
-  &::after {
-    display: none;
-  }
+  justify-content: center;
 `;
 
-const LogoText = styled.h1`
-  font-size: 1.5rem;
-  margin: 0;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 600;
+const Logo = styled(motion.img)`
+  height: 40px;
+  object-fit: contain;
 `;
 
 export default MobileHeader; 

@@ -1,391 +1,306 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getSpreadById } from '../services/supabase/supabaseClient';
-import { shuffleArray } from '../utils/helpers';
-import tarotData from '../services/tarotData';
+import { motion } from 'framer-motion';
+
+// Моковые данные раскладов
+const mockSpreads = [
+  {
+    id: 1,
+    name: 'Расклад на три карты',
+    description: 'Классический расклад: прошлое, настоящее и будущее. Простой способ получить быстрое понимание ситуации.',
+    cards_count: 3,
+    difficulty: 'easy',
+    image_url: 'https://i.ibb.co/mG0SrM8/three-card-spread.jpg',
+    positions: [
+      { name: 'Прошлое', description: 'События и влияния из прошлого, которые оказывают воздействие на текущую ситуацию.' },
+      { name: 'Настоящее', description: 'Текущее положение дел и энергии, действующие в настоящий момент.' },
+      { name: 'Будущее', description: 'Возможные исходы или направления, в которых ситуация может развиваться.' }
+    ],
+    instructions: [
+      'Успокойте ум и сосредоточьтесь на своем вопросе.',
+      'Тасуйте колоду, думая о ситуации, которую хотите прояснить.',
+      'Выберите три карты и разместите их слева направо.',
+      'Интерпретируйте карты в соответствии с их позициями: прошлое, настоящее и будущее.',
+      'Обратите внимание на связи между картами и общую историю, которую они рассказывают.'
+    ]
+  },
+  {
+    id: 2,
+    name: 'Кельтский крест',
+    description: 'Один из самых популярных и информативных раскладов, дающий детальный анализ ситуации с разных сторон.',
+    cards_count: 10,
+    difficulty: 'advanced',
+    image_url: 'https://i.ibb.co/9vHzp9S/celtic-cross.jpg',
+    positions: [
+      { name: 'Ситуация', description: 'Центральная тема или проблема, с которой вы сталкиваетесь.' },
+      { name: 'Влияние', description: 'Факторы, которые пересекают или влияют на ситуацию напрямую.' },
+      { name: 'Основание', description: 'Прошлые события или условия, которые создали текущую ситуацию.' },
+      { name: 'Недавнее прошлое', description: 'События, которые только что произошли и имеют влияние.' },
+      { name: 'Возможное будущее', description: 'Потенциальный исход, если текущий путь сохранится.' },
+      { name: 'Ближайшее будущее', description: 'События, которые вскоре произойдут.' },
+      { name: 'Вы', description: 'Ваше отношение к ситуации или как вы себя воспринимаете.' },
+      { name: 'Внешнее влияние', description: 'Как другие видят ситуацию или влияют на нее.' },
+      { name: 'Надежды/Страхи', description: 'Ваши скрытые эмоции, амбиции или страхи.' },
+      { name: 'Итог', description: 'Окончательный результат или возможное разрешение ситуации.' }
+    ],
+    instructions: [
+      'Успокойте ум и сосредоточьтесь на своем вопросе.',
+      'Тасуйте колоду, держа вопрос в уме.',
+      'Выберите десять карт и разместите их в форме кельтского креста.',
+      'Начните с центра (карты 1 и 2), затем продолжите с основанием креста (карты 3-6).',
+      'Завершите расклад, разместив четыре карты справа в виде столбца (карты 7-10).',
+      'Читайте карты в порядке их размещения, обращая внимание на взаимосвязи между ними.'
+    ]
+  },
+  {
+    id: 3,
+    name: 'Расклад на любовь',
+    description: 'Расклад для анализа любовных отношений и романтических перспектив с партнером.',
+    cards_count: 5,
+    difficulty: 'medium',
+    image_url: 'https://i.ibb.co/wWn6JXc/love-spread.jpg',
+    positions: [
+      { name: 'Вы', description: 'Ваша энергия и отношение к отношениям.' },
+      { name: 'Партнер', description: 'Энергия и отношение вашего партнера.' },
+      { name: 'Ваша динамика', description: 'Как вы взаимодействуете вместе и влияете друг на друга.' },
+      { name: 'Вызовы', description: 'Препятствия, с которыми вы сталкиваетесь в отношениях.' },
+      { name: 'Результат', description: 'Потенциальный исход или направление развития отношений.' }
+    ],
+    instructions: [
+      'Сосредоточьтесь на своих отношениях или на конкретном вопросе о них.',
+      'Тасуйте колоду, думая о своем партнере и ваших отношениях.',
+      'Выберите пять карт и разместите их в порядке: две сверху (вы и партнер), одну между ними (динамика), и две снизу (вызовы и результат).',
+      'Интерпретируйте каждую карту относительно её позиции и обратите внимание на общую картину отношений.'
+    ]
+  },
+  {
+    id: 4,
+    name: 'Расклад на решение',
+    description: 'Помогает принять решение, рассматривая альтернативные пути и потенциальные результаты каждого варианта.',
+    cards_count: 4,
+    difficulty: 'medium',
+    image_url: 'https://i.ibb.co/9G0SBFY/decision-spread.jpg',
+    positions: [
+      { name: 'Текущая ситуация', description: 'Обзор обстоятельств и энергий, окружающих ваше решение.' },
+      { name: 'Вариант А', description: 'Потенциальный результат, если вы выберете первый вариант.' },
+      { name: 'Вариант Б', description: 'Потенциальный результат, если вы выберете второй вариант.' },
+      { name: 'Совет', description: 'Дополнительная мудрость, которая поможет вам принять решение.' }
+    ],
+    instructions: [
+      'Ясно сформулируйте решение, которое вам нужно принять, и два возможных варианта.',
+      'Тасуйте колоду, сосредоточившись на вашей ситуации и возможных путях.',
+      'Выберите четыре карты и разместите первую сверху, две следующие под ней горизонтально, и четвертую внизу.',
+      'Интерпретируйте карты, обращая особое внимание на сравнение потенциальных результатов двух вариантов и общего совета.'
+    ]
+  },
+  {
+    id: 5,
+    name: 'Расклад на месяц',
+    description: 'Прогноз на предстоящий месяц с рекомендациями для каждой недели.',
+    cards_count: 5,
+    difficulty: 'medium',
+    image_url: 'https://i.ibb.co/njvvqpr/month-ahead.jpg',
+    positions: [
+      { name: 'Общая энергия', description: 'Основная тема и энергия месяца в целом.' },
+      { name: 'Неделя 1', description: 'События и уроки первой недели месяца.' },
+      { name: 'Неделя 2', description: 'События и уроки второй недели месяца.' },
+      { name: 'Неделя 3', description: 'События и уроки третьей недели месяца.' },
+      { name: 'Неделя 4', description: 'События и уроки четвертой недели месяца.' }
+    ],
+    instructions: [
+      'Сосредоточьтесь на предстоящем месяце и вопросах, которые интересуют вас в этот период.',
+      'Тасуйте колоду, думая о месяце в целом.',
+      'Выберите пять карт и разместите первую в центре, а остальные четыре вокруг неё по кругу по часовой стрелке.',
+      'Интерпретируйте центральную карту как общую тему месяца, а остальные — как указания на каждую неделю.'
+    ]
+  }
+];
 
 const SpreadDetails = () => {
   const { spreadId } = useParams();
-  const { isSubscribed } = useSelector(state => state.auth);
-  
+  const navigate = useNavigate();
+  const [spread, setSpread] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [spread, setSpread] = useState(null);
-  const [isReading, setIsReading] = useState(false);
-  const [cards, setCards] = useState([]);
-  const [selectedCards, setSelectedCards] = useState([]);
-  const [revealedCards, setRevealedCards] = useState([]);
-  const [deckReady, setDeckReady] = useState(false);
-  const [readingComplete, setReadingComplete] = useState(false);
-  const [interpretation, setInterpretation] = useState('');
   
   useEffect(() => {
-    const fetchSpread = async () => {
+    // Имитация загрузки данных расклада
+    const fetchSpreadDetails = async () => {
       try {
         setLoading(true);
         
-        // Получаем расклад по ID
-        const { data, error } = await getSpreadById(spreadId);
+        // Имитация задержки сети
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        if (error) {
-          throw new Error(error.message);
-        }
+        // Найти расклад по ID из моковых данных
+        const foundSpread = mockSpreads.find(s => s.id === parseInt(spreadId));
         
-        if (data) {
-          setSpread(data);
+        if (foundSpread) {
+          setSpread(foundSpread);
         } else {
-          // Демо расклад если данные не получены
-          const demoSpread = {
-            id: parseInt(spreadId),
-            name: 'Три карты',
-            description: 'Расклад для понимания прошлого, настоящего и будущего.',
-            cards_count: 3,
-            is_premium: false,
-            positions: ['Прошлое', 'Настоящее', 'Будущее'],
-            layout: {
-              type: 'line',
-              positions: [
-                { x: 25, y: 50 },
-                { x: 50, y: 50 },
-                { x: 75, y: 50 }
-              ]
-            }
-          };
-          setSpread(demoSpread);
+          setError('Расклад не найден');
         }
       } catch (err) {
-        console.error('Error fetching spread:', err);
-        setError('Не удалось загрузить расклад. Пожалуйста, попробуйте позже.');
+        console.error('Error fetching spread details:', err);
+        setError('Произошла ошибка при загрузке данных. Пожалуйста, попробуйте позже.');
       } finally {
         setLoading(false);
       }
     };
     
-    fetchSpread();
+    fetchSpreadDetails();
   }, [spreadId]);
   
-  // Начать чтение
-  const startReading = () => {
-    if (!spread) return;
-    
-    setIsReading(true);
-    
-    // Создаем колоду
-    const allCards = [...tarotData.major, ...tarotData.minor];
-    const shuffledDeck = shuffleArray(allCards);
-    setCards(shuffledDeck);
-    
-    setTimeout(() => {
-      setDeckReady(true);
-    }, 1000);
+  const handleStartReading = () => {
+    // В реальном приложении здесь был бы переход к странице с раскладом
+    alert('В демо-версии функция выполнения расклада недоступна');
+    // navigate(`/reading/${spreadId}`);
   };
-  
-  // Выбрать карту
-  const selectCard = (index) => {
-    if (selectedCards.length >= spread.cards_count) return;
-    
-    // Убираем выбранную карту из колоды и добавляем в выбранные
-    const newDeck = [...cards];
-    const selectedCard = newDeck.splice(index, 1)[0];
-    
-    // Случайно определяем, будет ли карта перевернута (20% шанс)
-    const isReversed = Math.random() > 0.8;
-    selectedCard.isReversed = isReversed;
-    
-    setCards(newDeck);
-    setSelectedCards([...selectedCards, selectedCard]);
-  };
-  
-  // Перевернуть карту и показать значение
-  const revealCard = (index) => {
-    if (revealedCards.includes(index)) return;
-    
-    const newRevealedCards = [...revealedCards, index];
-    setRevealedCards(newRevealedCards);
-    
-    // Если все карты открыты, завершаем чтение
-    if (newRevealedCards.length === spread.cards_count) {
-      setTimeout(() => {
-        setReadingComplete(true);
-        generateInterpretation();
-      }, 1000);
-    }
-  };
-  
-  // Генерация интерпретации расклада
-  const generateInterpretation = () => {
-    const interpretationParts = selectedCards.map((card, index) => {
-      const position = spread.positions ? spread.positions[index] : `Позиция ${index + 1}`;
-      const reversed = card.isReversed ? ' (в перевернутом положении)' : '';
-      
-      return `${position}: ${card.name}${reversed}
-${card.isReversed ? card.meaning_rev : card.meaning_up}`;
-    });
-    
-    setInterpretation(interpretationParts.join('\n\n'));
-  };
-  
-  // Начать новый расклад
-  const resetReading = () => {
-    setIsReading(false);
-    setCards([]);
-    setSelectedCards([]);
-    setRevealedCards([]);
-    setDeckReady(false);
-    setReadingComplete(false);
-    setInterpretation('');
-  };
-  
-  if (loading) {
-    return (
-      <Container>
-        <LoadingContainer>
-          <div className="loading-spinner"></div>
-          <p>Загрузка расклада...</p>
-        </LoadingContainer>
-      </Container>
-    );
-  }
-  
-  if (error) {
-    return (
-      <Container>
-        <ErrorMessage>{error}</ErrorMessage>
-        <BackButton to="/spreads">Вернуться к раскладам</BackButton>
-      </Container>
-    );
-  }
   
   return (
-    <Container>
+    <PageContainer className="page-container">
       <BlobBackground>
         <Blob className="blob-1" />
         <Blob className="blob-2" />
         <Blob className="blob-3" />
       </BlobBackground>
       
-      {!isReading ? (
-        <IntroContainer>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <SpreadTitle>{spread?.name}</SpreadTitle>
-            <SpreadDescription>{spread?.description}</SpreadDescription>
-            
-            <PositionsPreview>
-              <h3>Позиции в раскладе:</h3>
-              <PositionsList>
-                {spread?.positions && spread.positions.map((position, index) => (
-                  <PositionItem key={index}>
-                    <PositionNumber>{index + 1}</PositionNumber>
-                    <PositionName>{position}</PositionName>
-                  </PositionItem>
-                ))}
-              </PositionsList>
-            </PositionsPreview>
-            
-            <ActionButtons>
-              <StartButton 
-                onClick={startReading}
-                as={motion.button}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Начать расклад
-              </StartButton>
-              <BackButton 
-                to="/spreads"
-                as={motion.button}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Вернуться к раскладам
-              </BackButton>
-            </ActionButtons>
-          </motion.div>
-        </IntroContainer>
-      ) : (
-        <ReadingContainer>
-          {!readingComplete ? (
-            <>
-              {/* Колода карт для выбора */}
-              {selectedCards.length < spread.cards_count && (
-                <DeckSection>
-                  <SectionTitle>
-                    Выберите {spread.cards_count - selectedCards.length} {spread.cards_count - selectedCards.length === 1 ? 'карту' : (spread.cards_count - selectedCards.length < 5 ? 'карты' : 'карт')}
-                  </SectionTitle>
-                  <DeckContainer>
-                    <AnimatePresence>
-                      {deckReady && cards.slice(0, 15).map((card, index) => (
-                        <CardInDeck
-                          key={`deck-${index}`}
-                          as={motion.div}
-                          initial={{ opacity: 0, y: 20, rotateY: 180 }}
-                          animate={{ 
-                            opacity: 1, 
-                            y: 0, 
-                            rotateY: 180, 
-                            transition: { delay: index * 0.05, duration: 0.3 } 
-                          }}
-                          exit={{ 
-                            opacity: 0, 
-                            y: -50, 
-                            transition: { duration: 0.2 } 
-                          }}
-                          whileHover={{ 
-                            y: -10, 
-                            boxShadow: '0 15px 25px rgba(0, 0, 0, 0.3)',
-                            transition: { duration: 0.2 }
-                          }}
-                          onClick={() => selectCard(index)}
-                        >
-                          <CardBack />
-                        </CardInDeck>
-                      ))}
-                    </AnimatePresence>
-                  </DeckContainer>
-                </DeckSection>
-              )}
-              
-              {/* Расклад карт */}
-              {selectedCards.length > 0 && (
-                <SpreadSection>
-                  <SectionTitle>Ваш расклад</SectionTitle>
-                  <SpreadLayout>
-                    {spread?.layout.positions.map((position, index) => {
-                      const card = selectedCards[index];
-                      const isRevealed = revealedCards.includes(index);
-                      
-                      return (
-                        <CardPosition
-                          key={`position-${index}`}
-                          style={{
-                            left: `${position.x}%`,
-                            top: `${position.y}%`,
-                          }}
-                        >
-                          <PositionName>{spread.positions ? spread.positions[index] : `Позиция ${index + 1}`}</PositionName>
-                          
-                          {card ? (
-                            <SpreadCard
-                              onClick={() => revealCard(index)}
-                              as={motion.div}
-                              initial={{ rotateY: 180 }}
-                              animate={{ 
-                                rotateY: isRevealed ? 0 : 180,
-                                transition: { duration: 0.6 }
-                              }}
-                              $isRevealed={isRevealed}
-                              $isReversed={card.isReversed}
-                            >
-                              <CardInner>
-                                <CardBack />
-                                <CardFront>
-                                  <CardImage 
-                                    src={`/images/cards/${card.name_short}.jpg`} 
-                                    alt={card.name}
-                                    onError={(e) => {
-                                      e.target.src = `https://via.placeholder.com/150x260/12121f/9b59d9?text=${card.name}`;
-                                    }}
-                                  />
-                                  <CardTitle>{card.name}</CardTitle>
-                                </CardFront>
-                              </CardInner>
-                            </SpreadCard>
-                          ) : (
-                            <EmptyPosition>
-                              {index + 1}
-                            </EmptyPosition>
-                          )}
-                        </CardPosition>
-                      );
-                    })}
-                  </SpreadLayout>
-                </SpreadSection>
-              )}
-              
-              {/* Инструкции */}
-              <Instructions>
-                {selectedCards.length < spread.cards_count
-                  ? 'Выберите карты из колоды выше'
-                  : 'Нажмите на карты, чтобы открыть их'}
-              </Instructions>
-            </>
-          ) : (
-            <ResultsContainer
-              as={motion.div}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <SectionTitle>Ваше чтение карт</SectionTitle>
-              
-              <ReadingResults>
-                {selectedCards.map((card, index) => (
-                  <CardResult key={`result-${index}`}>
-                    <ResultPosition>
-                      {spread.positions ? spread.positions[index] : `Позиция ${index + 1}`}
-                    </ResultPosition>
-                    <ResultCardContainer>
-                      <ResultCard $isReversed={card.isReversed}>
-                        <CardImage 
-                          src={`/images/cards/${card.name_short}.jpg`} 
-                          alt={card.name} 
-                          onError={(e) => {
-                            e.target.src = `https://via.placeholder.com/150x260/12121f/9b59d9?text=${card.name}`;
-                          }}
-                        />
-                      </ResultCard>
-                      <ResultInfo>
-                        <ResultCardName>
-                          {card.name} {card.isReversed && '(Перевернута)'}
-                        </ResultCardName>
-                        <ResultMeaning>
-                          {card.isReversed ? card.meaning_rev : card.meaning_up}
-                        </ResultMeaning>
-                      </ResultInfo>
-                    </ResultCardContainer>
-                  </CardResult>
-                ))}
-              </ReadingResults>
-              
-              <ActionButtons>
-                <StartButton 
-                  onClick={resetReading}
-                  as={motion.button}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Новый расклад
-                </StartButton>
-                <BackButton 
-                  to="/spreads"
-                  as={motion.button}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Вернуться к раскладам
-                </BackButton>
-              </ActionButtons>
-            </ResultsContainer>
-          )}
-        </ReadingContainer>
+      {loading && (
+        <LoadingContainer>
+          <div className="loading-spinner"></div>
+          <p>Загружаем информацию о раскладе...</p>
+        </LoadingContainer>
       )}
-    </Container>
+      
+      {error && (
+        <ErrorMessage>
+          <span className="material-symbols-rounded">error</span>
+          {error}
+          <BackButton 
+            onClick={() => navigate('/spreads')}
+            as={motion.button}
+            whileTap={{ scale: 0.95 }}
+          >
+            Вернуться к раскладам
+          </BackButton>
+        </ErrorMessage>
+      )}
+      
+      {!loading && !error && spread && (
+        <ContentContainer>
+          <SpreadHeader>
+            <BackLink 
+              onClick={() => navigate('/spreads')}
+              as={motion.div}
+              whileHover={{ x: -3 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="material-symbols-rounded">arrow_back</span>
+              Все расклады
+            </BackLink>
+            
+            <DifficultyBadge $difficulty={spread.difficulty}>
+              {spread.difficulty === 'easy' && 'Легкий расклад'}
+              {spread.difficulty === 'medium' && 'Средний расклад'}
+              {spread.difficulty === 'advanced' && 'Продвинутый расклад'}
+            </DifficultyBadge>
+          </SpreadHeader>
+          
+          <SpreadContent>
+            <SpreadImageSection>
+              <SpreadImage 
+                src={spread.image_url} 
+                alt={spread.name}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://i.ibb.co/mG0SrM8/three-card-spread.jpg';
+                }}
+              />
+              <CardCount>
+                <span className="material-symbols-rounded">style</span>
+                {spread.cards_count} карт
+              </CardCount>
+            </SpreadImageSection>
+            
+            <SpreadInfoSection>
+              <SpreadName>{spread.name}</SpreadName>
+              <SpreadDescription>{spread.description}</SpreadDescription>
+              
+              <StartReadingButton 
+                onClick={handleStartReading}
+                as={motion.button}
+                whileHover={{ y: -3, boxShadow: '0 10px 15px rgba(155, 89, 217, 0.3)' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="material-symbols-rounded">playing_cards</span>
+                Начать расклад
+              </StartReadingButton>
+            </SpreadInfoSection>
+          </SpreadContent>
+          
+          <SpreadDetailsSection className="glass-card">
+            <SectionTitle>Позиции карт</SectionTitle>
+            <PositionsList>
+              {spread.positions.map((position, index) => (
+                <PositionItem 
+                  key={index}
+                  as={motion.div}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <PositionNumber>{index + 1}</PositionNumber>
+                  <PositionContent>
+                    <PositionName>{position.name}</PositionName>
+                    <PositionDescription>{position.description}</PositionDescription>
+                  </PositionContent>
+                </PositionItem>
+              ))}
+            </PositionsList>
+          </SpreadDetailsSection>
+          
+          <InstructionsSection className="glass-card">
+            <SectionTitle>Инструкция по раскладу</SectionTitle>
+            <InstructionSteps>
+              {spread.instructions.map((instruction, index) => (
+                <InstructionStep 
+                  key={index}
+                  as={motion.div}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <StepNumber>{index + 1}</StepNumber>
+                  <StepText>{instruction}</StepText>
+                </InstructionStep>
+              ))}
+            </InstructionSteps>
+          </InstructionsSection>
+          
+          <ButtonContainer>
+            <StartReadingButton 
+              onClick={handleStartReading}
+              as={motion.button}
+              whileHover={{ y: -3, boxShadow: '0 10px 15px rgba(155, 89, 217, 0.3)' }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className="material-symbols-rounded">playing_cards</span>
+              Начать расклад
+            </StartReadingButton>
+          </ButtonContainer>
+        </ContentContainer>
+      )}
+    </PageContainer>
   );
 };
 
-const Container = styled.div`
-  position: relative;
-  max-width: 1200px;
+// Styled Components
+const PageContainer = styled.div`
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 40px 20px;
-  min-height: 80vh;
+  padding: 2rem 1.5rem;
+  position: relative;
 `;
 
 const BlobBackground = styled.div`
@@ -415,7 +330,7 @@ const Blob = styled.div`
   }
   
   &.blob-2 {
-    bottom: 10%;
+    bottom: 30%;
     right: 15%;
     width: 250px;
     height: 250px;
@@ -435,351 +350,306 @@ const Blob = styled.div`
   }
 `;
 
-const IntroContainer = styled.div`
+const LoadingContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1.5rem;
+  
+  p {
+    color: var(--text-secondary);
+  }
 `;
 
-const SpreadTitle = styled.h1`
-  margin-bottom: 20px;
+const ErrorMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: rgba(255, 76, 76, 0.1);
+  border: 1px solid rgba(255, 76, 76, 0.3);
+  border-radius: var(--radius);
+  color: #ff4c4c;
+  margin: 2rem auto;
+  max-width: 500px;
+  text-align: center;
+  
+  .material-symbols-rounded {
+    font-size: 2rem;
+  }
+`;
+
+const BackButton = styled.button`
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--card-bg-hover);
+    color: var(--primary);
+  }
+`;
+
+const ContentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+`;
+
+const SpreadHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+`;
+
+const BackLink = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: var(--primary);
+  }
+  
+  .material-symbols-rounded {
+    font-size: 1.2rem;
+  }
+`;
+
+const DifficultyBadge = styled.div`
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: ${props => {
+    if (props.$difficulty === 'easy') return 'rgba(46, 213, 115, 0.1)';
+    if (props.$difficulty === 'medium') return 'rgba(255, 193, 7, 0.1)';
+    if (props.$difficulty === 'advanced') return 'rgba(255, 71, 87, 0.1)';
+    return 'rgba(155, 89, 217, 0.1)';
+  }};
+  color: ${props => {
+    if (props.$difficulty === 'easy') return '#2ed573';
+    if (props.$difficulty === 'medium') return '#ffc107';
+    if (props.$difficulty === 'advanced') return '#ff4757';
+    return 'var(--primary)';
+  }};
+  border: 1px solid ${props => {
+    if (props.$difficulty === 'easy') return 'rgba(46, 213, 115, 0.3)';
+    if (props.$difficulty === 'medium') return 'rgba(255, 193, 7, 0.3)';
+    if (props.$difficulty === 'advanced') return 'rgba(255, 71, 87, 0.3)';
+    return 'rgba(155, 89, 217, 0.3)';
+  }};
+`;
+
+const SpreadContent = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const SpreadImageSection = styled.div`
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+`;
+
+const SpreadImage = styled.img`
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: var(--radius);
+`;
+
+const CardCount = styled.div`
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  
+  .material-symbols-rounded {
+    font-size: 1.2rem;
+  }
+`;
+
+const SpreadInfoSection = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const SpreadName = styled.h1`
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 const SpreadDescription = styled.p`
-  max-width: 700px;
-  margin: 0 auto 30px;
-  line-height: 1.6;
-  color: var(--text-secondary);
   font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: var(--text);
+  flex: 1;
 `;
 
-const PositionsPreview = styled.div`
-  margin: 20px 0 40px;
-  background: var(--card-bg);
-  padding: 25px;
-  border-radius: var(--radius);
-  max-width: 600px;
-  width: 100%;
+const StartReadingButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  padding: 1rem 1.5rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
   
-  h3 {
-    margin-bottom: 20px;
-    font-size: 1.2rem;
+  &:hover {
+    background: var(--primary-light);
+    transform: translateY(-3px);
+  }
+  
+  .material-symbols-rounded {
+    font-size: 1.3rem;
+  }
+`;
+
+const SpreadDetailsSection = styled.div`
+  padding: 2rem;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--radius);
   }
 `;
 
 const PositionsList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1.2rem;
 `;
 
 const PositionItem = styled.div`
   display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 10px;
-  border-radius: var(--radius);
-  transition: background 0.3s ease;
+  gap: 1rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
   
-  &:hover {
-    background: rgba(155, 89, 217, 0.1);
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
   }
 `;
 
 const PositionNumber = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
   background: var(--primary);
   color: white;
-  width: 30px;
-  height: 30px;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-`;
-
-const PositionName = styled.div`
-  font-weight: 500;
-`;
-
-const ActionButtons = styled.div`
-  display: flex;
-  gap: 15px;
-  margin-top: 20px;
-  
-  @media (max-width: 600px) {
-    flex-direction: column;
-    width: 100%;
-  }
-`;
-
-const StartButton = styled.button`
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  border-radius: var(--radius-full);
-  font-size: 1rem;
-  font-family: var(--font-heading);
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(155, 89, 217, 0.3);
-`;
-
-const BackButton = styled(Link)`
-  background: var(--card-bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 12px 30px;
-  border-radius: var(--radius-full);
-  font-size: 1rem;
-  font-family: var(--font-heading);
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
-`;
-
-const ReadingContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-`;
-
-const SectionTitle = styled.h2`
-  margin-bottom: 20px;
-  text-align: center;
-`;
-
-const DeckSection = styled.div`
-  margin-bottom: 30px;
-`;
-
-const DeckContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 15px;
-  max-width: 900px;
-  margin: 0 auto;
-`;
-
-const CardInDeck = styled.div`
-  width: 90px;
-  height: 150px;
-  perspective: 1000px;
-  cursor: pointer;
-  transform-style: preserve-3d;
-`;
-
-const CardBack = styled.div`
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  backface-visibility: hidden;
-  background-image: linear-gradient(135deg, #1a1e3a 0%, #2a3166 100%);
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(155, 89, 217, 0.2);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    bottom: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-  }
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 30px;
-    height: 30px;
-    background-image: url('/logo.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0.6;
-  }
-`;
-
-const SpreadSection = styled.div`
-  margin-top: 20px;
-`;
-
-const SpreadLayout = styled.div`
-  position: relative;
-  background: rgba(18, 21, 48, 0.3);
-  border-radius: var(--radius);
-  height: 400px;
-  margin: 0 auto;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-`;
-
-const CardPosition = styled.div`
-  position: absolute;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 120px;
-`;
-
-const EmptyPosition = styled.div`
-  width: 80px;
-  height: 120px;
-  border: 2px dashed rgba(155, 89, 217, 0.3);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  font-size: 1.2rem;
-  background: rgba(18, 21, 48, 0.2);
-`;
-
-const SpreadCard = styled.div`
-  width: 80px;
-  height: 120px;
-  perspective: 1000px;
-  cursor: ${props => props.$isRevealed ? 'default' : 'pointer'};
-  transform-style: preserve-3d;
-`;
-
-const CardInner = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-`;
-
-const CardFront = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  transform: rotateY(180deg);
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background: var(--card-bg);
-`;
-
-const CardImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-`;
-
-const CardTitle = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 5px;
-  font-size: 0.7rem;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
-
-const Instructions = styled.div`
-  text-align: center;
-  margin-top: 20px;
-  color: var(--text-secondary);
-  font-style: italic;
-`;
-
-const ResultsContainer = styled.div`
-  width: 100%;
-`;
-
-const ReadingResults = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  margin-bottom: 40px;
-`;
-
-const CardResult = styled.div`
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 20px;
-  
-  &:hover {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const ResultPosition = styled.h3`
-  margin-bottom: 15px;
-  color: var(--primary);
-  font-size: 1.2rem;
-`;
-
-const ResultCardContainer = styled.div`
-  display: flex;
-  gap: 20px;
-  
-  @media (max-width: 767px) {
-    flex-direction: column;
-  }
-`;
-
-const ResultCard = styled.div`
-  width: 120px;
-  height: 200px;
-  border-radius: 10px;
-  overflow: hidden;
+  font-weight: 600;
   flex-shrink: 0;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  transform: ${props => props.$isReversed ? 'rotate(180deg)' : 'none'};
 `;
 
-const ResultInfo = styled.div`
+const PositionContent = styled.div`
   flex: 1;
 `;
 
-const ResultCardName = styled.h4`
-  margin-bottom: 10px;
-  font-size: 1.1rem;
+const PositionName = styled.h3`
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary-light);
 `;
 
-const ResultMeaning = styled.p`
+const PositionDescription = styled.p`
+  font-size: 1rem;
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: var(--text);
 `;
 
-const LoadingContainer = styled.div`
+const InstructionsSection = styled.div`
+  padding: 2rem;
+`;
+
+const InstructionSteps = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 300px;
-  
-  p {
-    margin-top: 20px;
-    color: var(--text-secondary);
-  }
+  gap: 1.2rem;
 `;
 
-const ErrorMessage = styled.div`
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #ff6b6b;
-  padding: 20px;
-  border-radius: var(--radius);
-  margin-bottom: 20px;
-  text-align: center;
+const InstructionStep = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
+const StepNumber = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+`;
+
+const StepText = styled.p`
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
 `;
 
 export default SpreadDetails; 

@@ -40,20 +40,24 @@ const Home = () => {
           </HeroSubtitle>
           <HeroButtonsContainer>
             <HeroButton 
+              to="/cards"
               className="primary-button"
-              as={motion.div}
+              as={motion.button}
               whileHover={{ y: -5, boxShadow: '0 10px 25px rgba(155, 89, 217, 0.5)' }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => window.location.href = '/cards'}
             >
-              <Link to="/cards">Библиотека карт</Link>
+              Библиотека карт
             </HeroButton>
             <HeroButtonSecondary 
+              to="/daily-card"
               className="secondary-button"
-              as={motion.div}
+              as={motion.button}
               whileHover={{ y: -5 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => window.location.href = '/daily-card'}
             >
-              <Link to="/daily-card">Карта дня</Link>
+              Карта дня
             </HeroButtonSecondary>
           </HeroButtonsContainer>
         </HeroContent>
@@ -125,11 +129,12 @@ const Home = () => {
             Создайте аккаунт, чтобы сохранять свои расклады и получать ежедневные карты
           </CTADescription>
           <CTAButton 
-            as={motion.div}
+            as={motion.button}
             whileHover={{ y: -5, boxShadow: '0 10px 25px rgba(155, 89, 217, 0.5)' }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => window.location.href = '/register'}
           >
-            <Link to="/register">Регистрация</Link>
+            Регистрация
           </CTAButton>
         </CTAContent>
       </CTASection>
@@ -284,7 +289,7 @@ const HeroButtonsContainer = styled.div`
   }
 `;
 
-const HeroButton = styled.div`
+const HeroButton = styled.button`
   a {
     display: inline-block;
     padding: 1rem 2rem;
@@ -307,7 +312,7 @@ const HeroButton = styled.div`
   }
 `;
 
-const HeroButtonSecondary = styled.div`
+const HeroButtonSecondary = styled.button`
   a {
     display: inline-block;
     padding: 1rem 2rem;
@@ -484,7 +489,7 @@ const CTADescription = styled.p`
   }
 `;
 
-const CTAButton = styled.div`
+const CTAButton = styled.button`
   display: inline-block;
   
   a {
