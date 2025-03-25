@@ -44,6 +44,8 @@
   --gradient-secondary: linear-gradient(135deg, var(--tertiary) 0%, var(--primary) 100%);
   --gradient-card: linear-gradient(145deg, var(--card-bg), var(--card-bg-hover));
   --gradient-glow: radial-gradient(circle at 50% 50%, rgba(155, 89, 217, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+  --gradient-text: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  --gradient-button: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
 }
 
 /* Reset */
@@ -51,19 +53,21 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
 }
 
 html, body {
   height: 100%;
   width: 100%;
   overflow-x: hidden;
-  background-color: var(--background);
-  color: var(--text);
+  background-color: var(--background) !important;
+  color: var(--text) !important;
   font-family: var(--font-body);
   line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  animation: fadeInBg 0.1s forwards;
 }
 
 body.mobile-view {
@@ -509,4 +513,91 @@ a:hover::after {
   100% {
     transform: translate(0, 0) scale(1);
   }
+}
+
+/* Принудительное применение глобальных стилей к контейнерам */
+.page-container {
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+}
+
+/* Исправление теней */
+.glass-card,
+.neo-card,
+.tarot-card {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Исправление фона карточек */
+.card-bg,
+.glass-bg,
+.card-container {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Принудительное применение стилей для цвета фона */
+.BackgroundContainer,
+.layout-container,
+.main-content {
+  background-color: var(--background) !important;
+}
+
+/* Исправление футера */
+footer {
+  background-color: var(--background-secondary) !important;
+  color: var(--text) !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+/* Фикс для белого фона при загрузке */
+@keyframes fadeInBg {
+  from {
+    background-color: var(--background);
+  }
+  to {
+    background-color: var(--background);
+  }
+}
+
+body {
+  animation: fadeInBg 0.1s forwards;
+}
+
+/* Стили для кнопок регистрации и входа */
+a[href="/register"], 
+a[href="/login"],
+button[href="/register"],
+button[href="/login"] {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  background: var(--gradient-primary) !important;
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  text-shadow: none !important;
+  box-shadow: 0 4px 15px rgba(155, 89, 217, 0.3);
+  border: none;
+  font-family: var(--font-heading);
+}
+
+/* Кнопка CTA в нижней секции */
+.CTAContent a[href="/register"],
+.CTAButton a,
+a.cta-button {
+  display: inline-block;
+  padding: 1rem 2.5rem !important;
+  font-size: 1.1rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  background: var(--gradient-primary) !important;
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  box-shadow: 0 5px 15px rgba(155, 89, 217, 0.3);
+  font-family: var(--font-heading);
 } 

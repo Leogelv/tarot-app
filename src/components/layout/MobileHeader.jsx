@@ -1,90 +1,53 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 
 const MobileHeader = () => {
-  const location = useLocation();
-  
-  // Определяем заголовок страницы на основе текущего пути
-  const getPageTitle = () => {
-    const path = location.pathname;
-    
-    if (path === '/') return 'Главная';
-    if (path === '/cards') return 'Библиотека карт';
-    if (path === '/daily-card') return 'Карта дня';
-    if (path === '/spreads') return 'Расклады';
-    if (path.startsWith('/spreads/')) return 'Просмотр расклада';
-    if (path === '/profile') return 'Профиль';
-    if (path === '/about') return 'О проекте';
-    if (path === '/login') return 'Вход';
-    if (path === '/register') return 'Регистрация';
-    
-    return 'Таро Инсайт';
-  };
-  
   return (
     <HeaderContainer>
-      <LogoLink to="/">
-        <LogoText>
-          <LogoIcon>✨</LogoIcon>
-          <span>Таро Инсайт</span>
-        </LogoText>
-      </LogoLink>
-      
-      <PageTitle
-        as={motion.h1}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        key={location.pathname}
-      >
-        {getPageTitle()}
-      </PageTitle>
+      <Logo to="/">
+        <LogoText>Таро Инсайт</LogoText>
+      </Logo>
     </HeaderContainer>
   );
 };
 
 const HeaderContainer = styled.header`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px 20px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 90;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: rgba(9, 11, 26, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 `;
 
-const LogoLink = styled(Link)`
-  text-decoration: none;
-  color: inherit;
-  margin-bottom: 5px;
-`;
-
-const LogoText = styled.div`
+const Logo = styled(Link)`
   display: flex;
   align-items: center;
-  font-weight: 700;
-  font-size: 1.2rem;
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  text-decoration: none;
+  
+  &::after {
+    display: none;
+  }
 `;
 
-const LogoIcon = styled.span`
-  margin-right: 5px;
-  font-size: 1.4rem;
-`;
-
-const PageTitle = styled.h1`
-  font-size: 1.3rem;
+const LogoText = styled.h1`
+  font-size: 1.5rem;
   margin: 0;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-weight: 600;
-  color: var(--text);
 `;
 
 export default MobileHeader; 

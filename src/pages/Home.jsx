@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 
 const Home = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -19,93 +20,116 @@ const Home = () => {
   }, []);
 
   return (
-    <HomeContainer className="page-container">
+    <HomeContainer className="page-container dark-theme">
+      <BlobBackground>
+        <Blob className="blob-1" />
+        <Blob className="blob-2" />
+        <Blob className="blob-3" />
+      </BlobBackground>
+      
       <HeroSection>
-        <HeroContent>
-          <HeroTitle className="card-title">Discover Your Path with Tarot Insights</HeroTitle>
-          <HeroSubtitle className="card-description">
-            Explore the ancient wisdom of Tarot with our modern, intuitive app
+        <HeroContent
+          as={motion.div}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <HeroTitle className="gradient-text">Откройте тайны Таро</HeroTitle>
+          <HeroSubtitle>
+            Исследуйте древнюю мудрость карт Таро с помощью нашего современного и интуитивного приложения
           </HeroSubtitle>
           <HeroButtonsContainer>
-            <HeroButton as={Link} to="/card-library" className="primary-button tap-highlight">
-              Explore Card Library
+            <HeroButton 
+              className="primary-button"
+              as={motion.div}
+              whileHover={{ y: -5, boxShadow: '0 10px 25px rgba(155, 89, 217, 0.5)' }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link to="/cards">Библиотека карт</Link>
             </HeroButton>
-            <HeroButton as={Link} to="/daily-card" secondary className="tap-highlight">
-              Get Daily Card
-            </HeroButton>
+            <HeroButtonSecondary 
+              className="secondary-button"
+              as={motion.div}
+              whileHover={{ y: -5 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link to="/daily-card">Карта дня</Link>
+            </HeroButtonSecondary>
           </HeroButtonsContainer>
         </HeroContent>
-        <HeroImageContainer className={isMobile ? "float-animation" : ""}>
+        
+        <HeroImageContainer
+          as={motion.div}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className={isMobile ? "float-animation" : ""}
+        >
           <HeroImage 
-            src={isMobile ? "https://i.imgur.com/qiXu7Bh.jpg" : "/images/hero-cards.png"} 
-            alt="Tarot cards" 
+            src="/assets/tarot-cards.png" 
+            alt="Карты Таро" 
             className={isMobile ? "glow-animation" : ""}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://i.ibb.co/TDfjvZd/tarot-cards.png';
+            }}
           />
         </HeroImageContainer>
       </HeroSection>
 
-      <FeaturesSection className="card-container">
-        <SectionTitle className="card-title">Why Choose Tarot Insights?</SectionTitle>
+      <FeaturesSection>
+        <SectionTitle
+          as={motion.h2}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          Почему стоит выбрать Таро Инсайт?
+        </SectionTitle>
         
         <FeaturesGrid>
-          <FeatureCard className="tap-highlight">
-            <FeatureIcon>🔮</FeatureIcon>
-            <FeatureTitle>Comprehensive Card Library</FeatureTitle>
-            <FeatureDescription className="card-description">
-              Access detailed interpretations for all 78 Tarot cards with beautiful imagery
-            </FeatureDescription>
-          </FeatureCard>
-
-          <FeatureCard className="tap-highlight">
-            <FeatureIcon>🌙</FeatureIcon>
-            <FeatureTitle>Daily Guidance</FeatureTitle>
-            <FeatureDescription className="card-description">
-              Receive a personalized daily card with reflections to guide your day
-            </FeatureDescription>
-          </FeatureCard>
-
-          <FeatureCard className="tap-highlight">
-            <FeatureIcon>🔯</FeatureIcon>
-            <FeatureTitle>Multiple Spreads</FeatureTitle>
-            <FeatureDescription className="card-description">
-              Choose from various Tarot spreads for different questions and situations
-            </FeatureDescription>
-          </FeatureCard>
-
-          <FeatureCard className="tap-highlight">
-            <FeatureIcon>📝</FeatureIcon>
-            <FeatureTitle>Personal Reflections</FeatureTitle>
-            <FeatureDescription className="card-description">
-              Save your thoughts and insights with each reading for future reference
-            </FeatureDescription>
-          </FeatureCard>
-
-          <FeatureCard className="tap-highlight">
-            <FeatureIcon>👤</FeatureIcon>
-            <FeatureTitle>User Profiles</FeatureTitle>
-            <FeatureDescription className="card-description">
-              Track your reading history and see patterns emerge over time
-            </FeatureDescription>
-          </FeatureCard>
-
-          <FeatureCard className="tap-highlight">
-            <FeatureIcon>✨</FeatureIcon>
-            <FeatureTitle>Premium Features</FeatureTitle>
-            <FeatureDescription className="card-description">
-              Unlock advanced spreads and detailed interpretations with a subscription
-            </FeatureDescription>
-          </FeatureCard>
+          {features.map((feature, index) => (
+            <FeatureCard 
+              key={index}
+              as={motion.div}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -10, boxShadow: '0 15px 30px rgba(0, 0, 0, 0.2)' }}
+              className="neo-card"
+            >
+              <FeatureIconContainer>
+                <FeatureIcon>{feature.icon}</FeatureIcon>
+              </FeatureIconContainer>
+              <FeatureTitle>{feature.title}</FeatureTitle>
+              <FeatureDescription>
+                {feature.description}
+              </FeatureDescription>
+            </FeatureCard>
+          ))}
         </FeaturesGrid>
       </FeaturesSection>
 
       <CTASection>
-        <CTAContent>
-          <CTATitle className="card-title">Begin Your Tarot Journey Today</CTATitle>
-          <CTADescription className="card-description">
-            Create an account to save your readings and receive daily guidance
+        <CTAContent
+          as={motion.div}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <CTATitle>Начните свой путь в Таро сегодня</CTATitle>
+          <CTADescription>
+            Создайте аккаунт, чтобы сохранять свои расклады и получать ежедневные карты
           </CTADescription>
-          <CTAButton as={Link} to="/register" className="primary-button tap-highlight">
-            Sign Up for Free
+          <CTAButton 
+            as={motion.div}
+            whileHover={{ y: -5, boxShadow: '0 10px 25px rgba(155, 89, 217, 0.5)' }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link to="/register">Регистрация</Link>
           </CTAButton>
         </CTAContent>
       </CTASection>
@@ -113,24 +137,109 @@ const Home = () => {
   );
 };
 
+// Массив с данными для фич
+const features = [
+  {
+    icon: '🔮',
+    title: 'Полная библиотека карт',
+    description: 'Доступ к подробным толкованиям всех 78 карт Таро с красивыми иллюстрациями'
+  },
+  {
+    icon: '🌙',
+    title: 'Ежедневные карты',
+    description: 'Получайте персональную карту дня с рекомендациями для вашего дня'
+  },
+  {
+    icon: '🔯',
+    title: 'Различные расклады',
+    description: 'Выбирайте из различных раскладов Таро для разных вопросов и ситуаций'
+  },
+  {
+    icon: '📝',
+    title: 'Личные размышления',
+    description: 'Сохраняйте свои мысли и инсайты с каждым раскладом для будущего анализа'
+  },
+  {
+    icon: '👤',
+    title: 'Профили пользователей',
+    description: 'Отслеживайте историю своих раскладов и наблюдайте за закономерностями'
+  },
+  {
+    icon: '✨',
+    title: 'Премиум функции',
+    description: 'Разблокируйте продвинутые расклады и детальные интерпретации с подпиской'
+  }
+];
+
 // Styled Components
 const HomeContainer = styled.div`
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
+  position: relative;
+  background-color: var(--background) !important;
+  color: var(--text) !important;
+`;
+
+const BlobBackground = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+`;
+
+const Blob = styled.div`
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.07;
+  
+  &.blob-1 {
+    top: 10%;
+    left: 15%;
+    width: 300px;
+    height: 300px;
+    background: var(--primary);
+    animation: blob-float 15s ease-in-out infinite alternate;
+  }
+  
+  &.blob-2 {
+    bottom: 30%;
+    right: 15%;
+    width: 250px;
+    height: 250px;
+    background: var(--secondary);
+    animation: blob-float 15s ease-in-out infinite alternate;
+    animation-delay: -2s;
+  }
+  
+  &.blob-3 {
+    top: 60%;
+    left: 40%;
+    width: 200px;
+    height: 200px;
+    background: var(--tertiary);
+    animation: blob-float 15s ease-in-out infinite alternate;
+    animation-delay: -4s;
+  }
 `;
 
 const HeroSection = styled.section`
   display: flex;
   align-items: center;
-  padding: 4rem 0;
-  gap: 2rem;
+  padding: 5rem 0;
+  gap: 3rem;
   
   @media (max-width: 768px) {
     flex-direction: column;
     text-align: center;
-    padding: 2rem 0;
+    padding: 3rem 0;
+    gap: 2rem;
   }
 `;
 
@@ -139,30 +248,35 @@ const HeroContent = styled.div`
 `;
 
 const HeroTitle = styled.h1`
-  font-size: 3rem;
-  color: var(--color-primary);
-  margin-bottom: 1rem;
+  font-size: 3.5rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-heading);
+  text-shadow: 0 2px 10px rgba(155, 89, 217, 0.3);
   
   @media (max-width: 768px) {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
   }
 `;
 
 const HeroSubtitle = styled.p`
   font-size: 1.2rem;
-  margin-bottom: 2rem;
-  color: var(--color-text);
-  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
   
   @media (max-width: 768px) {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
   }
 `;
 
 const HeroButtonsContainer = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 1.2rem;
   
   @media (max-width: 768px) {
     justify-content: center;
@@ -170,38 +284,54 @@ const HeroButtonsContainer = styled.div`
   }
 `;
 
-const HeroButton = styled.button`
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 30px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  
-  ${props => props.secondary ? `
-    background-color: transparent;
-    border: 2px solid var(--color-primary);
-    color: var(--color-primary);
-    
-    &:hover {
-      background-color: var(--color-primary);
-      color: white;
-    }
-  ` : `
-    background-color: var(--color-primary);
-    border: 2px solid var(--color-primary);
+const HeroButton = styled.div`
+  a {
+    display: inline-block;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    background: var(--gradient-primary);
     color: white;
-    
-    &:hover {
-      background-color: var(--color-primary-dark);
-      border-color: var(--color-primary-dark);
-    }
-  `}
+    box-shadow: 0 5px 15px rgba(155, 89, 217, 0.3);
+    font-family: var(--font-heading);
+  }
   
   @media (max-width: 768px) {
-    padding: 0.7rem 1.2rem;
-    font-size: 0.9rem;
+    a {
+      padding: 0.9rem 1.7rem;
+      font-size: 1rem;
+    }
+  }
+`;
+
+const HeroButtonSecondary = styled.div`
+  a {
+    display: inline-block;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    background: var(--card-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-family: var(--font-heading);
+  }
+  
+  &:hover a {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  
+  @media (max-width: 768px) {
+    a {
+      padding: 0.9rem 1.7rem;
+      font-size: 1rem;
+    }
   }
 `;
 
@@ -212,146 +342,170 @@ const HeroImageContainer = styled.div`
   align-items: center;
   
   @media (max-width: 768px) {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
   }
 `;
 
 const HeroImage = styled.img`
   max-width: 100%;
   height: auto;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
   
   @media (max-width: 768px) {
-    max-width: 85%;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
   }
 `;
 
 const FeaturesSection = styled.section`
-  padding: 4rem 0;
+  padding: 6rem 0;
   
   @media (max-width: 768px) {
-    padding: 2rem 0;
+    padding: 4rem 0;
   }
 `;
 
 const SectionTitle = styled.h2`
   text-align: center;
-  font-size: 2.2rem;
-  color: var(--color-primary);
-  margin-bottom: 3rem;
+  font-size: 2.5rem;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4rem;
+  font-family: var(--font-heading);
   
   @media (max-width: 768px) {
-    font-size: 1.8rem;
-    margin-bottom: 2rem;
+    font-size: 2rem;
+    margin-bottom: 3rem;
   }
 `;
 
 const FeaturesGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  gap: 2.5rem;
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2rem;
   }
 `;
 
 const FeatureCard = styled.div`
-  background-color: white;
-  border-radius: 10px;
-  padding: 2rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  }
-  
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-  }
+  padding: 2.5rem;
+  border-radius: var(--radius);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+`;
+
+const FeatureIconContainer = styled.div`
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 `;
 
 const FeatureIcon = styled.div`
   font-size: 2.5rem;
-  margin-bottom: 1rem;
-  
-  @media (max-width: 768px) {
-    font-size: 2rem;
-    margin-bottom: 0.8rem;
-  }
 `;
 
 const FeatureTitle = styled.h3`
-  font-size: 1.3rem;
-  color: var(--color-primary);
+  font-size: 1.5rem;
   margin-bottom: 1rem;
-  
-  @media (max-width: 768px) {
-    font-size: 1.2rem;
-    margin-bottom: 0.8rem;
-  }
+  font-family: var(--font-heading);
+  color: var(--text);
 `;
 
 const FeatureDescription = styled.p`
-  color: var(--color-text);
-  line-height: 1.6;
-  
-  @media (max-width: 768px) {
-    font-size: 0.95rem;
-  }
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
 `;
 
 const CTASection = styled.section`
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  border-radius: 10px;
-  padding: 4rem 2rem;
-  margin: 4rem 0;
-  text-align: center;
-  color: white;
+  padding: 4rem 0 6rem;
   
   @media (max-width: 768px) {
-    padding: 2.5rem 1.5rem;
-    margin: 2rem 0;
+    padding: 3rem 0 5rem;
   }
 `;
 
 const CTAContent = styled.div`
   max-width: 700px;
   margin: 0 auto;
+  text-align: center;
+  padding: 3.5rem;
+  border-radius: var(--radius);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+  
+  @media (max-width: 768px) {
+    padding: 2.5rem 1.5rem;
+  }
 `;
 
 const CTATitle = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 1rem;
+  font-size: 2.3rem;
+  margin-bottom: 1.5rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: var(--font-heading);
+  text-shadow: 0 2px 10px rgba(155, 89, 217, 0.3);
   
   @media (max-width: 768px) {
-    font-size: 1.7rem;
+    font-size: 1.8rem;
   }
 `;
 
 const CTADescription = styled.p`
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  margin-bottom: 2.5rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
   
   @media (max-width: 768px) {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
   }
 `;
 
-const CTAButton = styled(HeroButton)`
-  background-color: white;
-  color: var(--color-primary);
-  border-color: white;
+const CTAButton = styled.div`
+  display: inline-block;
   
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.9);
-    border-color: rgba(255, 255, 255, 0.9);
+  a {
+    display: inline-block;
+    padding: 1rem 3rem;
+    font-size: 1.1rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: 0 5px 15px rgba(155, 89, 217, 0.3);
+    font-family: var(--font-heading);
+  }
+  
+  @media (max-width: 768px) {
+    a {
+      padding: 0.9rem 2.5rem;
+      font-size: 1rem;
+    }
   }
 `;
 

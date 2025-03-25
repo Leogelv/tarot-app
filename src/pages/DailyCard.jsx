@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { getDailyCard, saveDailyCardReflection } from '../services/supabase/supabaseClient';
+import { getDailyCard, saveDailyReflection } from '../services/supabase/supabaseClient';
 
 const DailyCard = () => {
   const { user } = useSelector(state => state.auth);
@@ -116,7 +116,7 @@ const DailyCard = () => {
     try {
       setSavingReflection(true);
       
-      const { error } = await saveDailyCardReflection(card.id, reflection);
+      const { error } = await saveDailyReflection(user.id, card.id, reflection);
       
       if (error) {
         throw new Error(error.message);
