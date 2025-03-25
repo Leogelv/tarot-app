@@ -13,7 +13,7 @@ const mockSpreads = [
     description: 'Классический расклад: прошлое, настоящее и будущее. Простой способ получить быстрое понимание ситуации.',
     cards_count: 3,
     difficulty: 'easy',
-    image_url: 'https://i.ibb.co/mG0SrM8/three-card-spread.jpg'
+    image_url: 'https://i.ibb.co/DpKmR8b/three-card-spread.jpg'
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const mockSpreads = [
     description: 'Один из самых популярных и информативных раскладов, дающий детальный анализ ситуации с разных сторон.',
     cards_count: 10,
     difficulty: 'advanced',
-    image_url: 'https://i.ibb.co/9vHzp9S/celtic-cross.jpg'
+    image_url: 'https://i.ibb.co/RCKRwZJ/celtic-cross.jpg'
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ const mockSpreads = [
     description: 'Расклад для анализа любовных отношений и романтических перспектив с партнером.',
     cards_count: 5,
     difficulty: 'medium',
-    image_url: 'https://i.ibb.co/wWn6JXc/love-spread.jpg'
+    image_url: 'https://i.ibb.co/8sZgfSZ/love-spread.jpg'
   },
   {
     id: 4,
@@ -37,7 +37,7 @@ const mockSpreads = [
     description: 'Помогает принять решение, рассматривая альтернативные пути и потенциальные результаты каждого варианта.',
     cards_count: 4,
     difficulty: 'medium',
-    image_url: 'https://i.ibb.co/9G0SBFY/decision-spread.jpg'
+    image_url: 'https://i.ibb.co/wKGfzbW/decision-spread.jpg'
   },
   {
     id: 5,
@@ -45,7 +45,7 @@ const mockSpreads = [
     description: 'Прогноз на предстоящий месяц с рекомендациями для каждой недели.',
     cards_count: 5,
     difficulty: 'medium',
-    image_url: 'https://i.ibb.co/njvvqpr/month-ahead.jpg'
+    image_url: 'https://i.ibb.co/Qj8JGbm/month-ahead.jpg'
   }
 ];
 
@@ -249,8 +249,11 @@ const Spreads = () => {
 const SpreadsContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
-  position: relative;
+  padding: 1rem;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
 `;
 
 const BlobBackground = styled.div`

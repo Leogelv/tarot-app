@@ -11,7 +11,7 @@ const mockSpreads = [
     description: 'Классический расклад: прошлое, настоящее и будущее. Простой способ получить быстрое понимание ситуации.',
     cards_count: 3,
     difficulty: 'easy',
-    image_url: 'https://i.ibb.co/mG0SrM8/three-card-spread.jpg',
+    image_url: 'https://i.ibb.co/DpKmR8b/three-card-spread.jpg',
     positions: [
       { name: 'Прошлое', description: 'События и влияния из прошлого, которые оказывают воздействие на текущую ситуацию.' },
       { name: 'Настоящее', description: 'Текущее положение дел и энергии, действующие в настоящий момент.' },
@@ -31,7 +31,7 @@ const mockSpreads = [
     description: 'Один из самых популярных и информативных раскладов, дающий детальный анализ ситуации с разных сторон.',
     cards_count: 10,
     difficulty: 'advanced',
-    image_url: 'https://i.ibb.co/9vHzp9S/celtic-cross.jpg',
+    image_url: 'https://i.ibb.co/RCKRwZJ/celtic-cross.jpg',
     positions: [
       { name: 'Ситуация', description: 'Центральная тема или проблема, с которой вы сталкиваетесь.' },
       { name: 'Влияние', description: 'Факторы, которые пересекают или влияют на ситуацию напрямую.' },
@@ -59,7 +59,7 @@ const mockSpreads = [
     description: 'Расклад для анализа любовных отношений и романтических перспектив с партнером.',
     cards_count: 5,
     difficulty: 'medium',
-    image_url: 'https://i.ibb.co/wWn6JXc/love-spread.jpg',
+    image_url: 'https://i.ibb.co/8sZgfSZ/love-spread.jpg',
     positions: [
       { name: 'Вы', description: 'Ваша энергия и отношение к отношениям.' },
       { name: 'Партнер', description: 'Энергия и отношение вашего партнера.' },
@@ -80,7 +80,7 @@ const mockSpreads = [
     description: 'Помогает принять решение, рассматривая альтернативные пути и потенциальные результаты каждого варианта.',
     cards_count: 4,
     difficulty: 'medium',
-    image_url: 'https://i.ibb.co/9G0SBFY/decision-spread.jpg',
+    image_url: 'https://i.ibb.co/wKGfzbW/decision-spread.jpg',
     positions: [
       { name: 'Текущая ситуация', description: 'Обзор обстоятельств и энергий, окружающих ваше решение.' },
       { name: 'Вариант А', description: 'Потенциальный результат, если вы выберете первый вариант.' },
@@ -100,7 +100,7 @@ const mockSpreads = [
     description: 'Прогноз на предстоящий месяц с рекомендациями для каждой недели.',
     cards_count: 5,
     difficulty: 'medium',
-    image_url: 'https://i.ibb.co/njvvqpr/month-ahead.jpg',
+    image_url: 'https://i.ibb.co/Qj8JGbm/month-ahead.jpg',
     positions: [
       { name: 'Общая энергия', description: 'Основная тема и энергия месяца в целом.' },
       { name: 'Неделя 1', description: 'События и уроки первой недели месяца.' },
@@ -123,6 +123,9 @@ const SpreadDetails = () => {
   const [spread, setSpread] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isReading, setIsReading] = useState(false);
+  const [readingCards, setReadingCards] = useState([]);
+  const readingSectionRef = React.useRef(null);
   
   useEffect(() => {
     // Имитация загрузки данных расклада
@@ -153,9 +156,23 @@ const SpreadDetails = () => {
   }, [spreadId]);
   
   const handleStartReading = () => {
-    // В реальном приложении здесь был бы переход к странице с раскладом
-    alert('В демо-версии функция выполнения расклада недоступна');
-    // navigate(`/reading/${spreadId}`);
+    // Показываем подготовленный расклад вместо сообщения
+    const mockCards = Array(spread.cards_count).fill(null).map((_, i) => ({
+      id: i + 1,
+      position: spread.positions[i]?.name || `Позиция ${i+1}`,
+      cardName: ['Король Мечей', 'Десятка Пентаклей', 'Маг', 'Императрица', 'Шут', 'Колесо Фортуны', 'Сила', 'Звезда', 'Луна', 'Мир'][i % 10],
+      imageUrl: `https://i.ibb.co/DfVGGzg/card${(i % 10) + 1}.jpg`,
+      meaning: `Значение для позиции ${spread.positions[i]?.name || i+1}`
+    }));
+    
+    // Отображаем интерактивный расклад
+    setIsReading(true);
+    setReadingCards(mockCards);
+    
+    // Прокручиваем экран к расладу
+    setTimeout(() => {
+      readingSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
   
   return (
@@ -214,7 +231,7 @@ const SpreadDetails = () => {
                 alt={spread.name}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://i.ibb.co/mG0SrM8/three-card-spread.jpg';
+                  e.target.src = 'https://i.ibb.co/DpKmR8b/three-card-spread.jpg';
                 }}
               />
               <CardCount>
@@ -238,6 +255,39 @@ const SpreadDetails = () => {
               </StartReadingButton>
             </SpreadInfoSection>
           </SpreadContent>
+          
+          {isReading && (
+            <ReadingSection
+              ref={readingSectionRef}
+              as={motion.div}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="glass-card"
+            >
+              <SectionTitle>Ваш расклад</SectionTitle>
+              <ReadingGrid $cardCount={spread.cards_count}>
+                {readingCards.map((card, index) => (
+                  <CardItem
+                    key={index}
+                    as={motion.div}
+                    initial={{ opacity: 0, rotateY: 180 }}
+                    animate={{ opacity: 1, rotateY: 0 }}
+                    transition={{ delay: index * 0.2, duration: 0.7 }}
+                  >
+                    <CardFront>
+                      <CardImage src={card.imageUrl} alt={card.cardName} />
+                      <CardName>{card.cardName}</CardName>
+                      <PositionLabel>{card.position}</PositionLabel>
+                    </CardFront>
+                  </CardItem>
+                ))}
+              </ReadingGrid>
+              <ReadingNote>
+                В полной версии приложения вы получите подробную интерпретацию каждой карты и расклада в целом.
+              </ReadingNote>
+            </ReadingSection>
+          )}
           
           <SpreadDetailsSection className="glass-card">
             <SectionTitle>Позиции карт</SectionTitle>
@@ -278,17 +328,19 @@ const SpreadDetails = () => {
             </InstructionSteps>
           </InstructionsSection>
           
-          <ButtonContainer>
-            <StartReadingButton 
-              onClick={handleStartReading}
-              as={motion.button}
-              whileHover={{ y: -3, boxShadow: '0 10px 15px rgba(155, 89, 217, 0.3)' }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="material-symbols-rounded">playing_cards</span>
-              Начать расклад
-            </StartReadingButton>
-          </ButtonContainer>
+          {!isReading && (
+            <ButtonContainer>
+              <StartReadingButton 
+                onClick={handleStartReading}
+                as={motion.button}
+                whileHover={{ y: -3, boxShadow: '0 10px 15px rgba(155, 89, 217, 0.3)' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="material-symbols-rounded">playing_cards</span>
+                Начать расклад
+              </StartReadingButton>
+            </ButtonContainer>
+          )}
         </ContentContainer>
       )}
     </PageContainer>
@@ -299,8 +351,12 @@ const SpreadDetails = () => {
 const PageContainer = styled.div`
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 1rem;
   position: relative;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
 `;
 
 const BlobBackground = styled.div`
@@ -475,6 +531,10 @@ const SpreadImage = styled.img`
   height: 300px;
   object-fit: cover;
   border-radius: var(--radius);
+  
+  @media (max-width: 768px) {
+    height: 200px;
+  }
 `;
 
 const CardCount = styled.div`
@@ -650,6 +710,84 @@ const ButtonContainer = styled.div`
   justify-content: center;
   margin-top: 1rem;
   margin-bottom: 3rem;
+`;
+
+const ReadingSection = styled.div`
+  padding: 2rem;
+  margin: 2rem 0;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+`;
+
+const ReadingGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+`;
+
+const CardItem = styled.div`
+  perspective: 1000px;
+  height: 240px;
+  
+  @media (max-width: 768px) {
+    height: 180px;
+  }
+`;
+
+const CardFront = styled.div`
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border-radius: var(--radius);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+`;
+
+const CardImage = styled.img`
+  width: 100%;
+  height: 70%;
+  object-fit: cover;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+`;
+
+const CardName = styled.h3`
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0.2rem;
+  text-align: center;
+  color: var(--text);
+  padding: 0 0.5rem;
+`;
+
+const PositionLabel = styled.div`
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 0 0.5rem;
+`;
+
+const ReadingNote = styled.p`
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(155, 89, 217, 0.1);
+  border: 1px solid rgba(155, 89, 217, 0.2);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
 `;
 
 export default SpreadDetails; 
