@@ -4,48 +4,49 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { getSpreads } from '../services/supabase/supabaseClient';
+import SpreadVizualization from '../components/spreadVisuals/SpreadVisualization';
 
 // Моковые данные раскладов
 const mockSpreads = [
   {
     id: 1,
-    name: 'Расклад на три карты',
-    description: 'Классический расклад: прошлое, настоящее и будущее. Простой способ получить быстрое понимание ситуации.',
+    name: 'Трехкарточный расклад',
+    description: 'Классический расклад для получения быстрого совета. Три карты представляют прошлое, настоящее и будущее вашей ситуации.',
     cards_count: 3,
-    difficulty: 'easy',
-    image_url: 'https://i.ibb.co/DpKmR8b/three-card-spread.jpg'
+    difficulty: 'Начальный',
+    image_url: 'https://example.com/spreads/three-card.jpg',
   },
   {
     id: 2,
     name: 'Кельтский крест',
-    description: 'Один из самых популярных и информативных раскладов, дающий детальный анализ ситуации с разных сторон.',
+    description: 'Один из самых популярных и информативных раскладов. Даёт глубокое понимание ситуации и возможных путей её развития.',
     cards_count: 10,
-    difficulty: 'advanced',
-    image_url: 'https://i.ibb.co/RCKRwZJ/celtic-cross.jpg'
+    difficulty: 'Продвинутый',
+    image_url: 'https://example.com/spreads/celtic-cross.jpg',
   },
   {
     id: 3,
-    name: 'Расклад на любовь',
-    description: 'Расклад для анализа любовных отношений и романтических перспектив с партнером.',
-    cards_count: 5,
-    difficulty: 'medium',
-    image_url: 'https://i.ibb.co/8sZgfSZ/love-spread.jpg'
+    name: 'Семикарточная подкова',
+    description: 'Расклад в форме подковы для поиска решения проблемы. Помогает найти новый взгляд на сложную ситуацию.',
+    cards_count: 7,
+    difficulty: 'Средний',
+    image_url: 'https://example.com/spreads/horseshoe.jpg',
   },
   {
     id: 4,
-    name: 'Расклад на решение',
-    description: 'Помогает принять решение, рассматривая альтернативные пути и потенциальные результаты каждого варианта.',
-    cards_count: 4,
-    difficulty: 'medium',
-    image_url: 'https://i.ibb.co/wKGfzbW/decision-spread.jpg'
+    name: 'Расклад на отношения',
+    description: 'Специальный расклад для анализа отношений между двумя людьми. Показывает динамику и перспективы отношений.',
+    cards_count: 6,
+    difficulty: 'Средний',
+    image_url: 'https://example.com/spreads/relationship.jpg',
   },
   {
     id: 5,
-    name: 'Расклад на месяц',
-    description: 'Прогноз на предстоящий месяц с рекомендациями для каждой недели.',
-    cards_count: 5,
-    difficulty: 'medium',
-    image_url: 'https://i.ibb.co/Qj8JGbm/month-ahead.jpg'
+    name: 'Пирамида',
+    description: 'Иерархический расклад для анализа многоуровневых ситуаций. Каждый уровень представляет разные аспекты вопроса.',
+    cards_count: 10,
+    difficulty: 'Продвинутый',
+    image_url: 'https://example.com/spreads/pyramid.jpg',
   }
 ];
 
@@ -54,8 +55,8 @@ const Spreads = () => {
   const [spreads, setSpreads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
-  const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -87,43 +88,21 @@ const Spreads = () => {
     fetchSpreads();
   }, []);
   
-  // Фильтрация раскладов в зависимости от выбранной вкладки
+  // Фильтрация раскладов по поиску и сложности
   const filteredSpreads = spreads.filter(spread => {
-    if (filter === 'all') return true;
-    return spread.difficulty === filter;
+    const matchesSearch = spread.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         spread.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesDifficulty = selectedDifficulty === 'all' || 
+                             spread.difficulty.toLowerCase() === selectedDifficulty.toLowerCase();
+    
+    return matchesSearch && matchesDifficulty;
   });
   
-  // Визуализация макета расклада с мини-картами
-  const renderSpreadLayout = (spread) => {
-    if (!spread || !spread.layout) return null;
-    
-    const { layout } = spread;
-    
-    return (
-      <SpreadLayoutPreview>
-        {layout.positions.map((pos, index) => (
-          <MiniCard 
-            key={index}
-            style={{
-              left: `${pos.x}%`,
-              top: `${pos.y}%`,
-            }}
-            $delay={index * 0.05}
-          >
-            <MiniCardInner>
-              {index + 1}
-            </MiniCardInner>
-            {spread.position_preview && spread.position_preview[index] && (
-              <MiniCardTooltip>
-                {spread.position_preview[index]}
-              </MiniCardTooltip>
-            )}
-          </MiniCard>
-        ))}
-      </SpreadLayoutPreview>
-    );
+  const handleSpreadClick = (spreadId) => {
+    navigate(`/spreads/${spreadId}`);
   };
-
+  
   return (
     <SpreadsContainer className="page-container">
       <BlobBackground>
@@ -132,122 +111,119 @@ const Spreads = () => {
         <Blob className="blob-3" />
       </BlobBackground>
       
-      <PageHeader>
-        <PageTitle>Расклады Таро</PageTitle>
-        <PageDescription>
-          Выберите расклад для глубокого анализа и понимания вашей ситуации
-        </PageDescription>
+      <PageHeader
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <HeaderTitle>Расклады Таро</HeaderTitle>
+        <HeaderSubtitle>
+          Выберите один из классических раскладов для глубокого анализа вашей ситуации
+        </HeaderSubtitle>
       </PageHeader>
       
-      <FiltersContainer>
-        <FilterButton 
-          onClick={() => setFilter('all')} 
-          $active={filter === 'all'}
-          as={motion.button}
-          whileTap={{ scale: 0.95 }}
-        >
-          Все расклады
-        </FilterButton>
-        <FilterButton 
-          onClick={() => setFilter('easy')} 
-          $active={filter === 'easy'}
-          as={motion.button}
-          whileTap={{ scale: 0.95 }}
-        >
-          Простые
-        </FilterButton>
-        <FilterButton 
-          onClick={() => setFilter('medium')} 
-          $active={filter === 'medium'}
-          as={motion.button}
-          whileTap={{ scale: 0.95 }}
-        >
-          Средние
-        </FilterButton>
-        <FilterButton 
-          onClick={() => setFilter('advanced')} 
-          $active={filter === 'advanced'}
-          as={motion.button}
-          whileTap={{ scale: 0.95 }}
-        >
-          Продвинутые
-        </FilterButton>
-      </FiltersContainer>
+      <FiltersSection
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        <SearchContainer>
+          <SearchIcon className="material-symbols-rounded">search</SearchIcon>
+          <SearchInput 
+            type="text"
+            placeholder="Поиск раскладов..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <ClearButton onClick={() => setSearchTerm('')}>
+              <span className="material-symbols-rounded">close</span>
+            </ClearButton>
+          )}
+        </SearchContainer>
+        
+        <FilterTabs>
+          <FilterTab 
+            $isActive={selectedDifficulty === 'all'}
+            onClick={() => setSelectedDifficulty('all')}
+          >
+            Все
+          </FilterTab>
+          <FilterTab 
+            $isActive={selectedDifficulty === 'Начальный'}
+            onClick={() => setSelectedDifficulty('Начальный')}
+          >
+            Начальный
+          </FilterTab>
+          <FilterTab 
+            $isActive={selectedDifficulty === 'Средний'}
+            onClick={() => setSelectedDifficulty('Средний')}
+          >
+            Средний
+          </FilterTab>
+          <FilterTab 
+            $isActive={selectedDifficulty === 'Продвинутый'}
+            onClick={() => setSelectedDifficulty('Продвинутый')}
+          >
+            Продвинутый
+          </FilterTab>
+        </FilterTabs>
+      </FiltersSection>
       
-      {error && (
-        <ErrorMessage>{error}</ErrorMessage>
-      )}
-      
-      {loading && (
+      {loading ? (
         <LoadingContainer>
           <div className="loading-spinner"></div>
           <p>Загрузка раскладов...</p>
         </LoadingContainer>
-      )}
-      
-      {!loading && filteredSpreads.length === 0 && (
-        <NoResultsMessage>
-          Расклады не найдены. Попробуйте другой фильтр.
-        </NoResultsMessage>
-      )}
-      
-      <SpreadsGrid>
-        {filteredSpreads.map((spread, index) => (
-          <SpreadCard 
-            key={spread.id}
-            as={motion.div}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ 
-              opacity: 1, 
-              y: 0,
-              transition: { delay: index * 0.1, duration: 0.5 }
-            }}
-            whileHover={{ 
-              y: -10,
-              transition: { duration: 0.3 }
-            }}
-            className="neo-card"
-          >
-            {spread.is_premium && (
-              <PremiumBadge>
-                <motion.span
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ 
-                    repeat: Infinity, 
-                    duration: 2, 
-                    ease: "easeInOut" 
-                  }}
-                >
-                  Премиум
-                </motion.span>
-              </PremiumBadge>
-            )}
-            
-            <SpreadImage 
-              src={spread.image_url} 
-              alt={spread.name}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = 'https://i.ibb.co/DpKmR8b/three-card-spread.jpg';
-              }}
-            />
-            
-            <SpreadName>{spread.name}</SpreadName>
-            <CardCount>{spread.cards_count} карт</CardCount>
-            
-            <SpreadDescription>{spread.description}</SpreadDescription>
-            
-            <SpreadButton 
-              as={motion.button}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate(`/spreads/${spread.id}`)}
+      ) : error ? (
+        <ErrorMessage>{error}</ErrorMessage>
+      ) : filteredSpreads.length === 0 ? (
+        <EmptyState>
+          <span className="material-symbols-rounded">search_off</span>
+          <h3>Раскладов не найдено</h3>
+          <p>Попробуйте изменить параметры поиска или фильтры</p>
+        </EmptyState>
+      ) : (
+        <SpreadsGrid>
+          {filteredSpreads.map((spread) => (
+            <SpreadCard
+              key={spread.id}
+              as={motion.div}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              whileHover={{ y: -5 }}
+              onClick={() => handleSpreadClick(spread.id)}
             >
-              Начать расклад
-            </SpreadButton>
-          </SpreadCard>
-        ))}
-      </SpreadsGrid>
+              <SpreadVisualContainer>
+                <SpreadVizualization 
+                  spreadId={spread.id} 
+                  size="medium"
+                />
+              </SpreadVisualContainer>
+              
+              <SpreadInfo>
+                <SpreadName>{spread.name}</SpreadName>
+                <SpreadDetails>
+                  <SpreadDetail>
+                    <span className="material-symbols-rounded">style</span>
+                    {spread.cards_count} карт
+                  </SpreadDetail>
+                  <SpreadDetail>
+                    <span className="material-symbols-rounded">signal_cellular_alt</span>
+                    {spread.difficulty}
+                  </SpreadDetail>
+                </SpreadDetails>
+                <SpreadDescription>{spread.description}</SpreadDescription>
+                <StartButton>
+                  <span className="material-symbols-rounded">play_arrow</span>
+                  Начать расклад
+                </StartButton>
+              </SpreadInfo>
+            </SpreadCard>
+          ))}
+        </SpreadsGrid>
+      )}
     </SpreadsContainer>
   );
 };
@@ -309,238 +285,250 @@ const Blob = styled.div`
   }
 `;
 
-const PageHeader = styled.header`
+const PageHeader = styled(motion.header)`
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
 `;
 
-const PageTitle = styled.h1`
-  margin-bottom: 1rem;
+const HeaderTitle = styled.h1`
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-heading);
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
-const PageDescription = styled.p`
+const HeaderSubtitle = styled.p`
   font-size: 1.1rem;
   color: var(--text-secondary);
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
 `;
 
-const FiltersContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: center;
-  margin-bottom: 2.5rem;
+const FiltersSection = styled(motion.div)`
+  margin-bottom: 2rem;
 `;
 
-const FilterButton = styled.button`
-  padding: 0.6rem 1.2rem;
-  background: ${props => props.$active ? 'var(--primary)' : 'var(--card-bg)'};
-  color: ${props => props.$active ? 'white' : 'var(--text-secondary)'};
-  border: 1px solid ${props => props.$active ? 'var(--primary)' : 'var(--border)'};
+const SearchContainer = styled.div`
+  position: relative;
+  margin-bottom: 1.5rem;
+`;
+
+const SearchIcon = styled.span`
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-tertiary);
+  pointer-events: none;
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
+  font-size: 1rem;
+  color: var(--text);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+  }
+  
+  &::placeholder {
+    color: var(--text-tertiary);
+  }
+`;
+
+const ClearButton = styled.button`
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
   cursor: pointer;
+  
+  &:hover {
+    color: var(--text);
+  }
+  
+  .material-symbols-rounded {
+    font-size: 1.2rem;
+  }
+`;
+
+const FilterTabs = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+`;
+
+const FilterTab = styled.button`
+  padding: 0.5rem 1.2rem;
+  background: ${props => props.$isActive ? 'var(--primary)' : 'var(--card-bg)'};
+  color: ${props => props.$isActive ? 'white' : 'var(--text)'};
+  border: 1px solid ${props => props.$isActive ? 'var(--primary)' : 'var(--border)'};
+  border-radius: var(--radius-full);
   font-size: 0.9rem;
+  cursor: pointer;
   transition: all 0.3s ease;
   
   &:hover {
-    background: ${props => props.$active ? 'var(--primary-light)' : 'var(--card-bg-hover)'};
-    transform: translateY(-3px);
+    background: ${props => props.$isActive ? 'var(--primary-dark)' : 'var(--card-bg-hover)'};
+    border-color: ${props => props.$isActive ? 'var(--primary-dark)' : 'var(--primary)'};
+  }
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1.5rem;
+  
+  p {
+    color: var(--text-secondary);
+  }
+`;
+
+const ErrorMessage = styled.div`
+  padding: 1.5rem;
+  background: rgba(255, 76, 76, 0.1);
+  border: 1px solid rgba(255, 76, 76, 0.3);
+  border-radius: var(--radius);
+  color: #ff4c4c;
+  text-align: center;
+  margin: 2rem 0;
+`;
+
+const EmptyState = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1rem;
+  color: var(--text-secondary);
+  
+  .material-symbols-rounded {
+    font-size: e2.5rem;
+    opacity: 0.5;
+  }
+  
+  h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    font-size: 1rem;
+    max-width: 400px;
+    text-align: center;
   }
 `;
 
 const SpreadsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 30px;
+  gap: 2rem;
   
-  @media (max-width: 768px) {
+  @media (max-width: 400px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const SpreadCard = styled.div`
-  position: relative;
   border-radius: var(--radius);
   overflow: hidden;
-  padding: 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`;
-
-const SpreadImage = styled.img`
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: var(--radius);
-  margin: -25px -25px 0;
-  width: calc(100% + 50px);
-`;
-
-const PremiumBadge = styled.div`
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: linear-gradient(135deg, var(--accent) 0%, #ff9800 100%);
-  color: #1a1e3a;
-  padding: 5px 15px;
-  border-radius: var(--radius-full);
-  font-size: 0.8rem;
-  font-weight: 600;
-  z-index: 2;
-  box-shadow: 0 3px 10px rgba(255, 193, 7, 0.3);
-`;
-
-const SpreadLayoutContainer = styled.div`
-  position: relative;
-  width: 100%;
-  height: 200px;
-  margin: 20px 0;
-  background: rgba(18, 21, 48, 0.3);
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
-`;
-
-const SpreadLayoutPreview = styled.div`
-  position: relative;
-  width: 100%;
-  height: 100%;
-`;
-
-const MiniCard = styled.div`
-  position: absolute;
-  width: 28px;
-  height: 42px;
-  transform: translate(-50%, -50%);
-  background: var(--primary);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  z-index: 1;
-  animation: fadeIn 0.5s ease forwards;
-  animation-delay: ${props => props.$delay || 0}s;
-  opacity: 0;
+  background: var(--card-bg);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
   
   &:hover {
-    z-index: 3;
-    transform: translate(-50%, -50%) scale(1.15);
-    box-shadow: 0 5px 15px rgba(155, 89, 217, 0.4);
-  }
-  
-  &:hover > div:last-child {
-    opacity: 1;
-    transform: translateY(0);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
   }
 `;
 
-const MiniCardInner = styled.div`
-  color: white;
-  font-size: 0.8rem;
-  font-weight: bold;
+const SpreadVisualContainer = styled.div`
+  width: 100%;
+  height: 220px;
+  position: relative;
+  overflow: hidden;
 `;
 
-const MiniCardTooltip = styled.div`
-  position: absolute;
-  bottom: 110%;
-  left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: var(--glass-bg);
-  color: white;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 0.7rem;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(5px);
-  z-index: 4;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: var(--glass-bg) transparent transparent transparent;
-  }
+const SpreadInfo = styled.div`
+  padding: 1.5rem;
 `;
 
 const SpreadName = styled.h3`
-  font-size: 1.4rem;
-  margin-bottom: 5px;
+  font-size: 1.3rem;
+  font-family: var(--font-heading);
+  margin-bottom: 0.8rem;
+  color: var(--text);
 `;
 
-const CardCount = styled.div`
+const SpreadDetails = styled.div`
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+`;
+
+const SpreadDetail = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.9rem;
-  color: var(--primary);
-  margin-bottom: 10px;
-  font-weight: 500;
+  color: var(--text-secondary);
+  
+  .material-symbols-rounded {
+    font-size: 1.1rem;
+    color: var(--primary);
+  }
 `;
 
 const SpreadDescription = styled.p`
-  color: var(--text-secondary);
-  margin-bottom: 20px;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
-const SpreadButton = styled.button`
-  background: var(--gradient-primary);
+const StartButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.8rem;
+  background: var(--primary);
   color: white;
-  padding: 12px 25px;
-  border-radius: var(--radius-full);
-  text-decoration: none;
-  display: inline-block;
-  text-align: center;
-  font-family: var(--font-heading);
-  font-size: 0.95rem;
-  margin-top: auto;
-  transition: all 0.3s ease;
   border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(155, 89, 217, 0.3);
+  transition: background 0.3s ease;
   
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 7px 20px rgba(155, 89, 217, 0.5);
+    background: var(--primary-dark);
   }
-`;
-
-const LoadingContainer = styled.div`
-  text-align: center;
-  padding: 4rem 0;
   
-  p {
-    margin-top: 1rem;
-    color: var(--text-secondary);
+  .material-symbols-rounded {
+    font-size: 1.2rem;
   }
-`;
-
-const ErrorMessage = styled.div`
-  background-color: rgba(220, 53, 69, 0.1);
-  color: #ff6b6b;
-  padding: 1rem;
-  border-radius: var(--radius);
-  margin-bottom: 2rem;
-  text-align: center;
-  border: 1px solid rgba(220, 53, 69, 0.2);
-`;
-
-const NoResultsMessage = styled.div`
-  background-color: var(--card-bg);
-  color: var(--text-secondary);
-  padding: 2rem;
-  border-radius: var(--radius);
-  margin-bottom: 2rem;
-  text-align: center;
-  border: 1px solid var(--border);
 `;
 
 export default Spreads;
