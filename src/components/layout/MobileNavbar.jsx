@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
-import { motion } from 'framer-motion';
 
 const MobileNavbar = () => {
   // Навигационные элементы
@@ -20,9 +19,6 @@ const MobileNavbar = () => {
           key={index}
           to={item.path}
           end={item.exact}
-          as={motion.div}
-          whileHover={{ y: -3 }}
-          whileTap={{ scale: 0.9 }}
         >
           <span className="material-symbols-outlined">{item.icon}</span>
           <NavLabel>{item.label}</NavLabel>

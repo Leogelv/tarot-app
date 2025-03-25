@@ -19,13 +19,10 @@ const Navbar = () => {
     <NavbarContainer>
       <NavContent>
         <LogoContainer>
-          <LogoLink to="/" onClick={closeMenu}>
+          <LogoLink to="/" onClick={closeMenu} end>
             <Logo 
               src="https://i.ibb.co/TDfjvZd/file-75.png" 
               alt="Таро Инсайт Лого"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
             />
           </LogoLink>
         </LogoContainer>
@@ -44,9 +41,6 @@ const Navbar = () => {
               to="/" 
               onClick={closeMenu}
               end
-              as={motion.div}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.95 }}
             >
               Главная
             </StyledNavLink>
@@ -56,9 +50,6 @@ const Navbar = () => {
             <StyledNavLink 
               to="/cards" 
               onClick={closeMenu}
-              as={motion.div}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.95 }}
             >
               Карты
             </StyledNavLink>
@@ -68,9 +59,6 @@ const Navbar = () => {
             <StyledNavLink 
               to="/daily-card" 
               onClick={closeMenu}
-              as={motion.div}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.95 }}
             >
               Карта дня
             </StyledNavLink>
@@ -80,9 +68,6 @@ const Navbar = () => {
             <StyledNavLink 
               to="/spreads" 
               onClick={closeMenu}
-              as={motion.div}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.95 }}
             >
               Расклады
             </StyledNavLink>
@@ -92,9 +77,6 @@ const Navbar = () => {
             <StyledNavLink 
               to="/about" 
               onClick={closeMenu}
-              as={motion.div}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.95 }}
             >
               О нас
             </StyledNavLink>
@@ -104,9 +86,6 @@ const Navbar = () => {
             <NavLinkButton 
               to="/login" 
               onClick={closeMenu}
-              as={motion.div}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.95 }}
             >
               Войти
             </NavLinkButton>
@@ -116,9 +95,6 @@ const Navbar = () => {
             <NavLinkButtonPrimary 
               to="/register" 
               onClick={closeMenu}
-              as={motion.div}
-              whileHover={{ y: -2, boxShadow: '0 7px 20px rgba(155, 89, 217, 0.5)' }}
-              whileTap={{ scale: 0.95 }}
             >
               Регистрация
             </NavLinkButtonPrimary>
@@ -157,7 +133,7 @@ const LogoContainer = styled.div`
   align-items: center;
 `;
 
-const LogoLink = styled(Link)`
+const LogoLink = styled(NavLink)`
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -167,8 +143,8 @@ const LogoLink = styled(Link)`
   }
 `;
 
-const Logo = styled(motion.img)`
-  height: 40px;
+const Logo = styled.img`
+  height: 45px;
   object-fit: contain;
 `;
 

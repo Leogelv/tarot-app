@@ -40,24 +40,20 @@ const Home = () => {
           </HeroSubtitle>
           <HeroButtonsContainer>
             <HeroButton 
-              to="/cards"
               className="primary-button"
-              as={motion.button}
+              as={motion.div}
               whileHover={{ y: -5, boxShadow: '0 10px 25px rgba(155, 89, 217, 0.5)' }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => window.location.href = '/cards'}
             >
-              Библиотека карт
+              <Link to="/cards">Библиотека карт</Link>
             </HeroButton>
             <HeroButtonSecondary 
-              to="/daily-card"
               className="secondary-button"
-              as={motion.button}
+              as={motion.div}
               whileHover={{ y: -5 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => window.location.href = '/daily-card'}
             >
-              Карта дня
+              <Link to="/daily-card">Карта дня</Link>
             </HeroButtonSecondary>
           </HeroButtonsContainer>
         </HeroContent>
@@ -70,13 +66,9 @@ const Home = () => {
           className={isMobile ? "float-animation" : ""}
         >
           <HeroImage 
-            src="/assets/tarot-cards.png" 
+            src="https://i.ibb.co/TDfjvZd/file-75.png" 
             alt="Карты Таро" 
             className={isMobile ? "glow-animation" : ""}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = 'https://i.ibb.co/TDfjvZd/tarot-cards.png';
-            }}
           />
         </HeroImageContainer>
       </HeroSection>
@@ -129,12 +121,11 @@ const Home = () => {
             Создайте аккаунт, чтобы сохранять свои расклады и получать ежедневные карты
           </CTADescription>
           <CTAButton 
-            as={motion.button}
+            as={motion.div}
             whileHover={{ y: -5, boxShadow: '0 10px 25px rgba(155, 89, 217, 0.5)' }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => window.location.href = '/register'}
           >
-            Регистрация
+            <Link to="/register">Регистрация</Link>
           </CTAButton>
         </CTAContent>
       </CTASection>
@@ -289,7 +280,7 @@ const HeroButtonsContainer = styled.div`
   }
 `;
 
-const HeroButton = styled.button`
+const HeroButton = styled.div`
   a {
     display: inline-block;
     padding: 1rem 2rem;
@@ -312,7 +303,7 @@ const HeroButton = styled.button`
   }
 `;
 
-const HeroButtonSecondary = styled.button`
+const HeroButtonSecondary = styled.div`
   a {
     display: inline-block;
     padding: 1rem 2rem;
@@ -489,7 +480,7 @@ const CTADescription = styled.p`
   }
 `;
 
-const CTAButton = styled.button`
+const CTAButton = styled.div`
   display: inline-block;
   
   a {

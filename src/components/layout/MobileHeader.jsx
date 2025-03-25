@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const MobileHeader = () => {
@@ -11,9 +10,6 @@ const MobileHeader = () => {
           <Logo 
             src="https://i.ibb.co/TDfjvZd/file-75.png" 
             alt="Таро Инсайт Лого"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
           />
         </LogoContainer>
       </LogoLink>
@@ -27,7 +23,7 @@ const HeaderContainer = styled.header`
   align-items: center;
   padding: 12px 16px;
   width: 100%;
-  background: rgba(18, 18, 31, 0.8);
+  background: rgba(9, 11, 26, 0.8);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   position: fixed;
@@ -47,8 +43,8 @@ const LogoContainer = styled.div`
   justify-content: center;
 `;
 
-const Logo = styled(motion.img)`
-  height: 40px;
+const Logo = styled.img`
+  height: 45px;
   object-fit: contain;
 `;
 
