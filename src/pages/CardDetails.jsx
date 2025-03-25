@@ -183,7 +183,7 @@ const CardDetails = () => {
 };
 
 // Styled Components
-const PageContainer = styled.div\`
+const PageContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
@@ -193,9 +193,9 @@ const PageContainer = styled.div\`
   @media (max-width: 768px) {
     padding: 0.5rem;
   }
-\`;
+`;
 
-const BlobBackground = styled.div\`
+const BlobBackground = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -204,9 +204,9 @@ const BlobBackground = styled.div\`
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-\`;
+`;
 
-const Blob = styled.div\`
+const Blob = styled.div`
   position: absolute;
   border-radius: 50%;
   filter: blur(60px);
@@ -240,9 +240,9 @@ const Blob = styled.div\`
     animation: blob-float 15s ease-in-out infinite alternate;
     animation-delay: -4s;
   }
-\`;
+`;
 
-const BackButton = styled.button\`
+const BackButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -263,9 +263,9 @@ const BackButton = styled.button\`
   .material-symbols-rounded {
     font-size: 1.2rem;
   }
-\`;
+`;
 
-const LoadingContainer = styled.div\`
+const LoadingContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -276,15 +276,15 @@ const LoadingContainer = styled.div\`
   p {
     color: var(--text-secondary);
   }
-\`;
+`;
 
-const ContentContainer = styled.div\`
+const ContentContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2rem;
-\`;
+`;
 
-const CardSection = styled.div\`
+const CardSection = styled.div`
   display: grid;
   grid-template-columns: 350px 1fr;
   gap: 3rem;
@@ -294,9 +294,9 @@ const CardSection = styled.div\`
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-\`;
+`;
 
-const CardImageContainer = styled.div\`
+const CardImageContainer = styled.div`
   position: relative;
   border-radius: var(--radius);
   overflow: hidden;
@@ -308,15 +308,15 @@ const CardImageContainer = styled.div\`
     max-width: 280px;
     margin: 0 auto;
   }
-\`;
+`;
 
-const CardImage = styled.img\`
+const CardImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-\`;
+`;
 
-const CardGlow = styled.div\`
+const CardGlow = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -328,15 +328,15 @@ const CardGlow = styled.div\`
     transparent 100%
   );
   pointer-events: none;
-\`;
+`;
 
-const CardInfo = styled.div\`
+const CardInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-\`;
+`;
 
-const CardTitle = styled.h1\`
+const CardTitle = styled.h1`
   font-size: 2.5rem;
   background: var(--gradient-primary);
   -webkit-background-clip: text;
@@ -348,31 +348,31 @@ const CardTitle = styled.h1\`
     font-size: 2rem;
     text-align: center;
   }
-\`;
+`;
 
-const CardSubtitle = styled.div\`
+const CardSubtitle = styled.div`
   font-size: 1.1rem;
   color: var(--text-secondary);
   
   @media (max-width: 768px) {
     text-align: center;
   }
-\`;
+`;
 
-const CardDescription = styled.p\`
+const CardDescription = styled.p`
   font-size: 1.1rem;
   line-height: 1.7;
   color: var(--text);
-\`;
+`;
 
-const KeywordsList = styled.div\`
+const KeywordsList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.8rem;
   margin-top: 1rem;
-\`;
+`;
 
-const Keyword = styled.span\`
+const Keyword = styled.span`
   padding: 0.5rem 1rem;
   background: var(--card-bg);
   border: 1px solid var(--border);
@@ -384,9 +384,9 @@ const Keyword = styled.span\`
     border-color: var(--primary);
     color: var(--primary);
   }
-\`;
+`;
 
-const DetailsSection = styled.div\`
+const DetailsSection = styled.div`
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -395,15 +395,15 @@ const DetailsSection = styled.div\`
   @media (max-width: 768px) {
     padding: 1.5rem;
   }
-\`;
+`;
 
-const DetailBlock = styled.div\`
+const DetailBlock = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
-\`;
+`;
 
-const DetailTitle = styled.h3\`
+const DetailTitle = styled.h3`
   font-size: 1.2rem;
   color: var(--primary);
   display: flex;
@@ -414,22 +414,22 @@ const DetailTitle = styled.h3\`
   .material-symbols-rounded {
     font-size: 1.3rem;
   }
-\`;
+`;
 
-const DetailText = styled.p\`
+const DetailText = styled.p`
   font-size: 1.05rem;
   line-height: 1.7;
   color: var(--text);
-\`;
+`;
 
-const ElementalInfo = styled.div\`
+const ElementalInfo = styled.div`
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
   flex-wrap: wrap;
-\`;
+`;
 
-const ElementBadge = styled.div\`
+const ElementBadge = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -444,6 +444,6 @@ const ElementBadge = styled.div\`
     font-size: 1.1rem;
     color: var(--primary);
   }
-\`;
+`;
 
 export default CardDetails; 

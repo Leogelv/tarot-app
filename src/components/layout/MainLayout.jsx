@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import MobileHeader from './MobileHeader';
+import MobileNavbar from './MobileNavbar';
+import StarryBackground from '../StarryBackground';
+import DesktopPlaceholder from '../DesktopPlaceholder';
 
 // Components
 import Navbar from './Navbar';
 import Footer from './Footer';
-import MobileHeader from './MobileHeader';
-import MobileNavbar from './MobileNavbar';
 import TarotBackground from '../effects/TarotBackground';
 import PageTransition from '../effects/PageTransition';
 
@@ -43,6 +45,8 @@ const MainLayout = () => {
   
   return (
     <LayoutContainer className="layout-container">
+      <StarryBackground />
+      <DesktopPlaceholder />
       <TarotBackground />
       
       {isMobile ? <MobileHeader /> : <Navbar />}
