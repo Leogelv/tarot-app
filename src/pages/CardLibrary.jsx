@@ -1,13 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Моковые данные карт для демонстрации
 const mockCards = [
-  { id: 0, name: 'Шут', type: 'major', number: '0', image_url: 'https://www.trustedtarot.com/img/cards/the-fool.png' },
-  { id: 1, name: 'Маг', type: 'major', number: '1', image_url: 'https://www.trustedtarot.com/img/cards/the-magician.png' },
-  { id: 2, name: 'Верховная Жрица', type: 'major', number: '2', image_url: 'https://www.trustedtarot.com/img/cards/the-high-priestess.png' },
+  {
+    id: 0,
+    name: 'Шут',
+    type: 'major',
+    number: '0',
+    image_url: 'https://www.trustedtarot.com/img/cards/the-fool.png',
+    keywords: ['Новые начинания', 'Спонтанность', 'Приключения']
+  },
+  {
+    id: 1,
+    name: 'Маг',
+    type: 'major',
+    number: 'I',
+    image_url: 'https://www.trustedtarot.com/img/cards/the-magician.png',
+    keywords: ['Мастерство', 'Воля', 'Проявление']
+  },
+  {
+    id: 2,
+    name: 'Верховная Жрица',
+    type: 'major',
+    number: 'II',
+    image_url: 'https://www.trustedtarot.com/img/cards/the-high-priestess.png',
+    keywords: ['Интуиция', 'Тайны', 'Мудрость']
+  },
   { id: 3, name: 'Императрица', type: 'major', number: '3', image_url: 'https://www.trustedtarot.com/img/cards/the-empress.png' },
   { id: 4, name: 'Император', type: 'major', number: '4', image_url: 'https://www.trustedtarot.com/img/cards/the-emperor.png' },
   { id: 5, name: 'Иерофант', type: 'major', number: '5', image_url: 'https://www.trustedtarot.com/img/cards/the-hierophant.png' },
@@ -22,19 +43,19 @@ const mockCards = [
 ];
 
 const CardLibrary = () => {
+  const navigate = useNavigate();
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCard, setSelectedCard] = useState(null);
 
   useEffect(() => {
-    // Имитация загрузки с сервера
     const fetchCards = async () => {
       try {
         setLoading(true);
-        // Задержка для имитации загрузки
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Имитация загрузки данных
+        await new Promise(resolve => setTimeout(resolve, 800));
         setCards(mockCards);
       } catch (err) {
         console.error('Error fetching cards:', err);
@@ -42,37 +63,22 @@ const CardLibrary = () => {
         setLoading(false);
       }
     };
-    
+
     fetchCards();
   }, []);
 
-  // Filter cards based on selected filter and search term
-  const filteredCards = cards.filter(card => {
-    const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = 
-      filter === 'all' || 
-      (filter === 'major' && card.type === 'major') || 
-      (filter === 'cups' && card.suit === 'cups') || 
-      (filter === 'wands' && card.suit === 'wands') || 
-      (filter === 'swords' && card.suit === 'swords') || 
-      (filter === 'pentacles' && card.suit === 'pentacles');
-    
-    return matchesSearch && matchesFilter;
-  });
-  
-  // Card animation variants
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: i => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.05,
-        duration: 0.5,
-        ease: [0.43, 0.13, 0.23, 0.96]
-      }
-    })
+  const handleCardClick = (card) => {
+    setSelectedCard(card);
+    setTimeout(() => {
+      navigate(`/cards/${card.id}`);
+    }, 300);
   };
+
+  const filteredCards = cards.filter(card => {
+    const matchesFilter = filter === 'all' || card.type === filter;
+    const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <LibraryContainer className="page-container">
@@ -90,63 +96,29 @@ const CardLibrary = () => {
       <SearchContainer className="glass-card">
         <SearchInput 
           type="text"
-          placeholder="Поиск карт..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Поиск карты..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
         
-        <FilterToggle onClick={() => setShowFilters(!showFilters)}>
-          {showFilters ? 'Скрыть фильтры' : 'Показать фильтры'}
-        </FilterToggle>
-        
-        <FilterButtons $show={showFilters}>
-          <FilterButton 
-            $active={filter === 'all'} 
+        <FilterButtons>
+          <FilterButton
+            active={filter === 'all'}
             onClick={() => setFilter('all')}
-            as={motion.button}
-            whileTap={{ scale: 0.95 }}
           >
             Все карты
           </FilterButton>
-          <FilterButton 
-            $active={filter === 'major'} 
+          <FilterButton
+            active={filter === 'major'}
             onClick={() => setFilter('major')}
-            as={motion.button}
-            whileTap={{ scale: 0.95 }}
           >
-            Старшие Арканы
+            Старшие арканы
           </FilterButton>
-          <FilterButton 
-            $active={filter === 'cups'} 
-            onClick={() => setFilter('cups')}
-            as={motion.button}
-            whileTap={{ scale: 0.95 }}
+          <FilterButton
+            active={filter === 'minor'}
+            onClick={() => setFilter('minor')}
           >
-            Кубки
-          </FilterButton>
-          <FilterButton 
-            $active={filter === 'wands'} 
-            onClick={() => setFilter('wands')}
-            as={motion.button}
-            whileTap={{ scale: 0.95 }}
-          >
-            Жезлы
-          </FilterButton>
-          <FilterButton 
-            $active={filter === 'swords'} 
-            onClick={() => setFilter('swords')}
-            as={motion.button}
-            whileTap={{ scale: 0.95 }}
-          >
-            Мечи
-          </FilterButton>
-          <FilterButton 
-            $active={filter === 'pentacles'} 
-            onClick={() => setFilter('pentacles')}
-            as={motion.button}
-            whileTap={{ scale: 0.95 }}
-          >
-            Пентакли
+            Младшие арканы
           </FilterButton>
         </FilterButtons>
       </SearchContainer>
@@ -154,7 +126,7 @@ const CardLibrary = () => {
       {loading && (
         <LoadingContainer>
           <div className="loading-spinner"></div>
-          <p>Загрузка карт Таро...</p>
+          <p>Загрузка библиотеки...</p>
         </LoadingContainer>
       )}
       
@@ -165,35 +137,41 @@ const CardLibrary = () => {
       )}
       
       <CardsGrid>
-        {filteredCards.map((card, index) => (
-          <CardItem 
-            key={card.id || card.name} 
-            to={`/cards/${card.id || card.number || index}`}
-            as={motion.div}
-            custom={index}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            whileHover={{
-              y: -10, 
-              transition: { duration: 0.3 }
-            }}
-          >
-            <CardImageContainer className="animated-float">
-              <CardImage 
-                src={card.image_url} 
-                alt={card.name} 
-                loading="lazy" 
-              />
-              <CardGlow />
-            </CardImageContainer>
-            <CardName>{card.name}</CardName>
-            <CardType>
-              {card.type === 'major' ? 'Старший Аркан' : card.suit}
-              {card.number && ` • ${card.number}`}
-            </CardType>
-          </CardItem>
-        ))}
+        <AnimatePresence>
+          {filteredCards.map((card) => (
+            <CardItem
+              key={card.id}
+              as={motion.div}
+              layoutId={`card-${card.id}`}
+              onClick={() => handleCardClick(card)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              whileHover={{ 
+                y: -10,
+                transition: { duration: 0.2 }
+              }}
+            >
+              <CardImageWrapper>
+                <CardImage 
+                  src={card.image_url} 
+                  alt={card.name}
+                  loading="lazy"
+                />
+                <CardGlow />
+              </CardImageWrapper>
+              <CardContent>
+                <CardName>{card.name}</CardName>
+                <CardNumber>{card.number}</CardNumber>
+                <KeywordsList>
+                  {card.keywords.slice(0, 3).map((keyword, index) => (
+                    <Keyword key={index}>{keyword}</Keyword>
+                  ))}
+                </KeywordsList>
+              </CardContent>
+            </CardItem>
+          ))}
+        </AnimatePresence>
       </CardsGrid>
     </LibraryContainer>
   );
@@ -295,44 +273,26 @@ const SearchInput = styled.input`
   }
 `;
 
-const FilterToggle = styled.button`
-  background: transparent;
-  border: none;
-  color: var(--primary);
-  font-size: 0.9rem;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  padding: 0;
-  
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
 const FilterButtons = styled.div`
   display: flex;
+  justify-content: center;
+  gap: 1rem;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  max-height: ${props => props.$show ? '150px' : '0'};
-  overflow: hidden;
-  opacity: ${props => props.$show ? '1' : '0'};
-  transition: max-height 0.3s ease, opacity 0.3s ease;
 `;
 
 const FilterButton = styled.button`
   padding: 0.5rem 1rem;
-  background: ${props => props.$active ? 'var(--primary)' : 'var(--card-bg)'};
-  color: ${props => props.$active ? 'white' : 'var(--text-secondary)'};
-  border: 1px solid ${props => props.$active ? 'var(--primary)' : 'var(--border)'};
   border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: ${props => props.active ? 'var(--primary)' : 'var(--card-bg)'};
+  color: ${props => props.active ? 'var(--white)' : 'var(--text)'};
   cursor: pointer;
-  font-size: 0.85rem;
   transition: all 0.3s ease;
+  font-size: 0.9rem;
   
   &:hover {
-    background: ${props => props.$active ? 'var(--primary-light)' : 'var(--card-bg-hover)'};
-    transform: translateY(-2px);
+    border-color: var(--primary);
+    color: ${props => props.active ? 'var(--white)' : 'var(--primary)'};
   }
 `;
 
@@ -341,10 +301,10 @@ const LoadingContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
+  min-height: 400px;
+  gap: 1rem;
   
   p {
-    margin-top: 1rem;
     color: var(--text-secondary);
   }
 `;
@@ -361,59 +321,37 @@ const NoResultsMessage = styled.p`
 
 const CardsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 2rem;
+  padding: 1rem 0;
   
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
   }
 `;
 
-const CardItem = styled(Link)`
+const CardItem = styled(motion.div)`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-decoration: none;
-  padding: 1rem;
-  background: var(--glass-bg);
-  border-radius: var(--radius);
-  backdrop-filter: blur(var(--backdrop-blur));
-  -webkit-backdrop-filter: blur(var(--backdrop-blur));
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  gap: 1rem;
+  cursor: pointer;
   position: relative;
-  overflow: hidden;
-  
-  &:hover {
-    box-shadow: var(--glow), var(--glass-shadow);
-  }
-  
-  &::after {
-    display: none;
-  }
 `;
 
-const CardImageContainer = styled.div`
-  width: 100%;
+const CardImageWrapper = styled.div`
   position: relative;
-  margin-bottom: 1rem;
   border-radius: var(--radius);
   overflow: hidden;
+  aspect-ratio: 1/1.5;
+  background: var(--card-bg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 `;
 
 const CardImage = styled.img`
   width: 100%;
-  height: auto;
-  display: block;
-  object-fit: contain;
-  border-radius: var(--radius);
-  transition: transform 0.3s ease;
-  
-  ${CardItem}:hover & {
-    transform: scale(1.05);
-  }
+  height: 100%;
+  object-fit: cover;
 `;
 
 const CardGlow = styled.div`
@@ -422,28 +360,46 @@ const CardGlow = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: var(--gradient-glow);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background: radial-gradient(circle at 50% 50%, 
+    rgba(155, 89, 182, 0.1) 0%,
+    rgba(155, 89, 182, 0.05) 50%,
+    transparent 100%
+  );
   pointer-events: none;
-  
-  ${CardItem}:hover & {
-    opacity: 1;
-  }
+`;
+
+const CardContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
 `;
 
 const CardName = styled.h3`
-  font-size: 1rem;
-  margin: 0 0 0.3rem;
-  text-align: center;
+  font-size: 1.1rem;
   color: var(--text);
+  margin: 0;
+  font-family: var(--font-heading);
 `;
 
-const CardType = styled.p`
-  font-size: 0.8rem;
-  margin: 0;
-  text-align: center;
+const CardNumber = styled.span`
+  font-size: 0.9rem;
   color: var(--text-secondary);
+`;
+
+const KeywordsList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+const Keyword = styled.span`
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: var(--card-bg);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
 `;
 
 export default CardLibrary; 
