@@ -58,25 +58,13 @@ const Profile = () => {
           <span className="subtitle">Управление вашим аккаунтом</span>
         </SectionTitle>
         
-        <ProfileCard>
-          <div className="card-content">
-            <div className="card-icon">
-              <span className="material-symbols-outlined">account_circle</span>
-            </div>
-            <div className="card-info">
-              <h3>Демо-режим</h3>
-              <p>Вы используете приложение в демо-режиме. Все данные и настройки временные.</p>
-            </div>
-          </div>
-        </ProfileCard>
-        
         <ProfileCard
           as={motion.div}
           whileHover={{ y: -5, boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)' }}
         >
           <div className="card-content">
             <div className="card-icon subscription">
-              <span className="material-symbols-outlined">diamond</span>
+              <span className="material-symbols-rounded">diamond</span>
             </div>
             <div className="card-info">
               <h3>Премиум-статус</h3>
@@ -99,7 +87,7 @@ const Profile = () => {
             whileHover={{ y: -3, boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)' }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="material-symbols-outlined">dashboard</span>
+            <span className="material-symbols-rounded">dashboard</span>
             Перейти к раскладам
           </ActionButton>
           
@@ -109,7 +97,7 @@ const Profile = () => {
             whileHover={{ y: -3, boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)' }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="material-symbols-outlined">today</span>
+            <span className="material-symbols-rounded">today</span>
             Карта дня
           </ActionButton>
           
@@ -119,7 +107,7 @@ const Profile = () => {
             whileHover={{ y: -3, boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)' }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="material-symbols-outlined">logout</span>
+            <span className="material-symbols-rounded">logout</span>
             Выйти
           </LogoutButton>
         </ButtonsContainer>

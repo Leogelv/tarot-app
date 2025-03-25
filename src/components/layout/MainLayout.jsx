@@ -70,7 +70,7 @@ const LayoutContainer = styled.div`
 
 const MainContent = styled.main`
   flex: 1;
-  padding: ${props => props.$isMobile ? '70px 0 80px' : '100px 0 60px'};
+  padding: ${props => props.$isMobile ? '20px 0 80px' : '100px 0 60px'};
   width: 100%;
   max-width: 100vw;
   position: relative;

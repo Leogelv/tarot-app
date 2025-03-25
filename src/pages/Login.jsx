@@ -127,7 +127,7 @@ const Login = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <FormImage src="https://i.imgur.com/qiXu7Bh.jpg" alt="Таро Карта" />
+        <FormImage src="https://i.ibb.co/TDfjvZdV/file-75.png" alt="Таро Карта" />
       </FormImageWrapper>
     </LoginContainer>
   );

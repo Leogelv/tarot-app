@@ -192,7 +192,7 @@ const Register = () => {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <img src="https://i.imgur.com/aX9T34f.jpg" alt="Таро иллюстрация" />
+        <img src="https://i.ibb.co/TDfjvZdV/file-75.png" alt="Таро иллюстрация" />
       </ImageWrapper>
     </RegisterContainer>
   );

@@ -26,10 +26,8 @@ const HeaderContainer = styled.header`
   background: rgba(9, 11, 26, 0.8);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
+  position: relative;
+  z-index: 100;
 `;
 
 const LogoLink = styled(Link)`
@@ -66,4 +64,4 @@ const TechText = styled.span`
   letter-spacing: 2px;
 `;
 
-export default MobileHeader; 
+export default MobileHeader;
