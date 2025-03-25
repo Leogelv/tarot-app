@@ -37,6 +37,21 @@ const Home = () => {
     };
   }, []);
 
+  const getOSIcon = (os) => {
+    switch (os) {
+      case 'Android':
+        return 'phone_android';
+      case 'iOS':
+        return 'phone_iphone';
+      case 'Windows':
+        return 'laptop_windows';
+      case 'macOS':
+        return 'laptop_mac';
+      default:
+        return 'devices';
+    }
+  };
+
   return (
     <HomeContainer className="page-container dark-theme">
       <BlobBackground>
@@ -65,10 +80,7 @@ const Home = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <span className="material-symbols-rounded">
-                {deviceOS === 'Android' ? 'android' : 
-                deviceOS === 'iOS' ? 'apple' :
-                deviceOS === 'Windows' ? 'laptop_windows' : 
-                deviceOS === 'macOS' ? 'laptop_mac' : 'devices'}
+                {getOSIcon(deviceOS)}
               </span>
               <span>Оптимизировано для {deviceOS}</span>
             </OSBadge>
@@ -182,32 +194,32 @@ const Home = () => {
 // Массив с данными для фич
 const features = [
   {
-    icon: '🔮',
+    icon: 'auto_awesome',
     title: 'Полная библиотека карт',
     description: 'Доступ к подробным толкованиям всех 78 карт Таро с красивыми иллюстрациями'
   },
   {
-    icon: '🌙',
+    icon: 'nights_stay',
     title: 'Ежедневные карты',
     description: 'Получайте персональную карту дня с рекомендациями для вашего дня'
   },
   {
-    icon: '🔯',
+    icon: 'playing_cards',
     title: 'Различные расклады',
     description: 'Выбирайте из различных раскладов Таро для разных вопросов и ситуаций'
   },
   {
-    icon: '📝',
+    icon: 'edit_note',
     title: 'Личные размышления',
     description: 'Сохраняйте свои мысли и инсайты с каждым раскладом для будущего анализа'
   },
   {
-    icon: '👤',
+    icon: 'person',
     title: 'Профили пользователей',
     description: 'Отслеживайте историю своих раскладов и наблюдайте за закономерностями'
   },
   {
-    icon: '✨',
+    icon: 'magic_button',
     title: 'Премиум функции',
     description: 'Разблокируйте продвинутые расклады и детальные интерпретации с подпиской'
   }
@@ -457,8 +469,10 @@ const FeatureIconContainer = styled.div`
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 `;
 
-const FeatureIcon = styled.div`
+const FeatureIcon = styled.span.attrs({ className: 'material-symbols-rounded' })`
   font-size: 2.5rem;
+  color: var(--primary);
+  font-variation-settings: 'FILL' 1;
 `;
 
 const FeatureTitle = styled.h3`
@@ -566,6 +580,7 @@ const OSBadge = styled.div`
   .material-symbols-rounded {
     font-size: 18px;
     color: var(--primary);
+    font-variation-settings: 'FILL' 1;
   }
 `;
 
