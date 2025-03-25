@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -56,6 +56,7 @@ const Spreads = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('all');
   const [filter, setFilter] = useState('all');
+  const navigate = useNavigate();
   
   useEffect(() => {
     const fetchSpreads = async () => {
@@ -222,12 +223,17 @@ const Spreads = () => {
               </PremiumBadge>
             )}
             
+            <SpreadImage 
+              src={spread.image_url} 
+              alt={spread.name}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'https://i.ibb.co/DpKmR8b/three-card-spread.jpg';
+              }}
+            />
+            
             <SpreadName>{spread.name}</SpreadName>
             <CardCount>{spread.cards_count} карт</CardCount>
-            
-            <SpreadLayoutContainer>
-              {renderSpreadLayout(spread)}
-            </SpreadLayoutContainer>
             
             <SpreadDescription>{spread.description}</SpreadDescription>
             
@@ -235,7 +241,7 @@ const Spreads = () => {
               as={motion.button}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              to={`/spreads/${spread.id}`}
+              onClick={() => navigate(`/spreads/${spread.id}`)}
             >
               Начать расклад
             </SpreadButton>
@@ -360,6 +366,16 @@ const SpreadCard = styled.div`
   padding: 25px;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+`;
+
+const SpreadImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin: -25px -25px 0;
+  width: calc(100% + 50px);
 `;
 
 const PremiumBadge = styled.div`
@@ -475,7 +491,7 @@ const SpreadDescription = styled.p`
   line-height: 1.5;
 `;
 
-const SpreadButton = styled(Link)`
+const SpreadButton = styled.button`
   background: var(--gradient-primary);
   color: white;
   padding: 12px 25px;
