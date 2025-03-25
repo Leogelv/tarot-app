@@ -1,26 +1,43 @@
 {
-  "short_name": "Tarot Insights",
-  "name": "Tarot Insights: Daily Cards & Readings",
+  "short_name": "Таро Инсайт",
+  "name": "Таро Инсайт - Онлайн гадание на картах Таро",
   "icons": [
     {
-      "src": "/tarot-icon.svg",
+      "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/svg+xml"
+      "type": "image/x-icon"
     },
     {
-      "src": "/tarot-icon-192.png",
+      "src": "logo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/tarot-icon-512.png",
+      "src": "logo512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#3a2a6c",
-  "background_color": "#f8f5ff",
-  "orientation": "portrait"
+  "theme_color": "#12121f",
+  "background_color": "#12121f",
+  "orientation": "portrait",
+  "description": "Исследуйте карты Таро, получайте ежедневные предсказания и делайте персональные расклады",
+  "screenshots": [
+    {
+      "src": "screenshot1.jpg",
+      "type": "image/jpeg",
+      "sizes": "640x1136"
+    },
+    {
+      "src": "screenshot2.jpg",
+      "type": "image/jpeg",
+      "sizes": "640x1136"
+    }
+  ],
+  "categories": ["lifestyle", "personalization", "spiritual"],
+  "dir": "ltr",
+  "lang": "ru-RU",
+  "prefer_related_applications": false
 } 

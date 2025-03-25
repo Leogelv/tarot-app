@@ -11,7 +11,7 @@ import CardLibrary from './pages/CardLibrary';
 import CardDetail from './pages/CardDetail';
 import DailyCard from './pages/DailyCard';
 import Spreads from './pages/Spreads';
-import SpreadDetail from './pages/SpreadDetail';
+import SpreadDetails from './pages/SpreadDetails';
 import Profile from './pages/Profile';
 import ReadingDetail from './pages/ReadingDetail';
 import Login from './pages/Login';
@@ -28,7 +28,7 @@ export default function App() {
         <Route path="cards/:id" element={<CardDetail />} />
         <Route path="daily-card" element={<DailyCard />} />
         <Route path="spreads" element={<Spreads />} />
-        <Route path="spreads/:id" element={<SpreadDetail />} />
+        <Route path="spreads/:spreadId" element={<SpreadDetails />} />
         <Route path="profile" element={<Profile />} />
         <Route path="readings/:id" element={<ReadingDetail />} />
         <Route path="login" element={<Login />} />

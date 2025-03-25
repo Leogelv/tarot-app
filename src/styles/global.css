@@ -1,19 +1,27 @@
 /* Global CSS Variables */
 :root {
   /* Colors - Dark Theme */
-  --background: #12121f;
-  --background-secondary: #1e1e2f;
-  --card-bg: #252538;
+  --background: #090b1a;
+  --background-secondary: #121530;
+  --card-bg: #1a1e3a;
+  --card-bg-hover: #22284a;
   --primary: #9b59d9;
   --primary-light: #b07de2;
   --primary-dark: #7a44b0;
   --secondary: #e63e6d;
+  --tertiary: #36d6d6;
   --accent: #ffc107;
   --text: #f0f0f0;
-  --text-secondary: #aaa;
-  --border: #444464;
+  --text-secondary: #b8b8ce;
+  --border: #383964;
   --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   --glow: 0 0 20px rgba(155, 89, 217, 0.4);
+  
+  /* Glass Morphism */
+  --glass-bg: rgba(26, 30, 58, 0.7);
+  --glass-border: rgba(155, 89, 217, 0.2);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --backdrop-blur: 10px;
   
   /* Fonts */
   --font-heading: 'Unbounded', sans-serif;
@@ -25,10 +33,17 @@
   --navbar-height: 60px;
   --radius: 12px;
   --radius-large: 24px;
+  --radius-full: 9999px;
   
   /* Transitions */
   --transition-speed: 0.3s;
   --transition-speed-slow: 0.5s;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--tertiary) 0%, var(--primary) 100%);
+  --gradient-card: linear-gradient(145deg, var(--card-bg), var(--card-bg-hover));
+  --gradient-glow: radial-gradient(circle at 50% 50%, rgba(155, 89, 217, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
 }
 
 /* Reset */
@@ -48,6 +63,7 @@ html, body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 body.mobile-view {
@@ -71,99 +87,209 @@ h1, h2, h3, h4, h5, h6 {
 
 h1 {
   font-size: 2.75rem;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+  text-shadow: 0 5px 15px rgba(155, 89, 217, 0.3);
 }
 
 h2 {
   font-size: 2.25rem;
   margin-bottom: 1.25rem;
+  background: var(--gradient-secondary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 h3 {
   font-size: 1.75rem;
+  color: var(--text);
+  margin-bottom: 1rem;
 }
 
 p {
   margin-bottom: 1.5rem;
   color: var(--text-secondary);
+  font-size: 1.05rem;
 }
 
 a {
   color: var(--primary);
   text-decoration: none;
   transition: color var(--transition-speed) ease;
+  position: relative;
 }
 
 a:hover {
   color: var(--primary-light);
 }
 
-/* Card Styles */
+a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  transition: width var(--transition-speed) ease;
+}
+
+a:hover::after {
+  width: 100%;
+}
+
+/* Glass Card Styles */
+.glass-card {
+  background: var(--glass-bg);
+  border-radius: var(--radius);
+  padding: 1.8rem;
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--glow), var(--glass-shadow);
+}
+
+/* Neumorphic Card Styles */
+.neo-card {
+  background: var(--gradient-card);
+  border-radius: var(--radius);
+  padding: 1.8rem;
+  box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.25),
+              -8px -8px 16px rgba(46, 54, 100, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.neo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 12px 12px 20px rgba(0, 0, 0, 0.3),
+              -12px -12px 20px rgba(46, 54, 100, 0.15);
+}
+
+/* Tarot Card Styles */
 .tarot-card {
-  background-color: var(--card-bg);
+  background: var(--card-bg);
   border-radius: var(--radius);
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
   border: 1px solid var(--border);
-  transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+  transition: all var(--transition-speed) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.tarot-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-glow);
+  opacity: 0;
+  transition: opacity var(--transition-speed) ease;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .tarot-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px) scale(1.02);
   box-shadow: var(--glow), var(--card-shadow);
+}
+
+.tarot-card:hover::before {
+  opacity: 1;
 }
 
 .card-title {
   color: var(--primary);
   margin-bottom: 0.75rem;
   font-family: var(--font-heading);
+  position: relative;
+  z-index: 2;
 }
 
 .card-description {
   color: var(--text-secondary);
   font-size: 0.95rem;
+  line-height: 1.6;
+  position: relative;
+  z-index: 2;
 }
 
 /* Button Styles */
 .btn {
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  border-radius: var(--radius);
-  background-color: var(--primary);
+  border-radius: var(--radius-full);
+  background: var(--gradient-primary);
   color: white;
   font-family: var(--font-heading);
   font-weight: 500;
   border: none;
   cursor: pointer;
-  transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+  transition: all var(--transition-speed) ease;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(155, 89, 217, 0.3);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.7s ease;
 }
 
 .btn:hover {
-  background-color: var(--primary-light);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(155, 89, 217, 0.5);
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(155, 89, 217, 0.3);
 }
 
 .btn-secondary {
-  background-color: var(--secondary);
+  background: var(--gradient-secondary);
+  box-shadow: 0 4px 15px rgba(54, 214, 214, 0.3);
 }
 
 .btn-secondary:hover {
-  background-color: #f84b7c;
+  box-shadow: 0 7px 20px rgba(54, 214, 214, 0.5);
 }
 
 .btn-outline {
-  background-color: transparent;
+  background: transparent;
   border: 2px solid var(--primary);
   color: var(--primary);
+  box-shadow: none;
 }
 
 .btn-outline:hover {
-  background-color: rgba(155, 89, 217, 0.1);
+  background: rgba(155, 89, 217, 0.1);
+  box-shadow: 0 4px 15px rgba(155, 89, 217, 0.15);
 }
 
 /* Container & Grid Styles */
@@ -199,9 +325,15 @@ a:hover {
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.7; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0.7; transform: scale(0.98); }
 }
 
 @keyframes glow {
@@ -210,12 +342,27 @@ a:hover {
   100% { box-shadow: 0 0 10px rgba(155, 89, 217, 0.2); }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+  100% { opacity: 0.3; }
+}
+
 .animated-float {
   animation: float 6s ease-in-out infinite;
 }
 
 .animated-glow {
   animation: glow 3s ease-in-out infinite;
+}
+
+.animated-pulse {
+  animation: pulse 4s ease-in-out infinite;
 }
 
 /* Loading Animation */
@@ -258,35 +405,33 @@ a:hover {
   }
   
   .cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 1.25rem;
   }
   
   .tarot-card {
-    padding: 1rem;
+    padding: 1.2rem;
   }
   
   .card-description {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
   }
   
   .btn {
-    padding: 0.65rem 1.2rem;
-    font-size: 0.9rem;
+    padding: 0.7rem 1.3rem;
+    font-size: 0.95rem;
   }
 }
 
-/* Hide scrollbar but keep functionality */
 .no-scrollbar {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE & Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari & Opera */
+  display: none;
 }
 
-/* Utility Classes */
 .text-center {
   text-align: center;
 }
@@ -304,13 +449,64 @@ a:hover {
 .p-2 { padding: 1rem; }
 .p-3 { padding: 1.5rem; }
 
-/* Add styles for the 3D background and page effects */
-.tarot-background {
+/* Blob background */
+.blob-background {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
-  background-color: var(--background);
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.15;
+  animation: blob-float 15s ease-in-out infinite alternate;
+}
+
+.blob-1 {
+  top: 10%;
+  left: 15%;
+  width: 300px;
+  height: 300px;
+  background: var(--primary);
+  animation-delay: 0s;
+}
+
+.blob-2 {
+  bottom: 10%;
+  right: 15%;
+  width: 250px;
+  height: 250px;
+  background: var(--secondary);
+  animation-delay: -2s;
+}
+
+.blob-3 {
+  top: 60%;
+  left: 40%;
+  width: 200px;
+  height: 200px;
+  background: var(--tertiary);
+  animation-delay: -4s;
+}
+
+@keyframes blob-float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
 } 

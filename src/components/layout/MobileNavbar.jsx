@@ -1,81 +1,128 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { NavLink } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const MobileNavbar = () => {
+  const location = useLocation();
+  
   return (
     <NavbarContainer>
-      <NavItem to="/" end>
-        <NavIcon className="material-symbols-outlined">home</NavIcon>
-        <NavText>Home</NavText>
-      </NavItem>
+      <NavLink 
+        to="/" 
+        $isActive={location.pathname === '/'}
+        as={motion.div}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ y: -5 }}
+      >
+        <NavIcon className="material-symbols-rounded">home</NavIcon>
+        <NavText>Главная</NavText>
+      </NavLink>
       
-      <NavItem to="/cards">
-        <NavIcon className="material-symbols-outlined">style</NavIcon>
-        <NavText>Cards</NavText>
-      </NavItem>
+      <NavLink 
+        to="/cards" 
+        $isActive={location.pathname === '/cards'}
+        as={motion.div}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ y: -5 }}
+      >
+        <NavIcon className="material-symbols-rounded">style</NavIcon>
+        <NavText>Карты</NavText>
+      </NavLink>
       
-      <NavItem to="/spreads">
-        <NavIcon className="material-symbols-outlined">dashboard</NavIcon>
-        <NavText>Spreads</NavText>
-      </NavItem>
+      <NavLink 
+        to="/daily-card" 
+        $isActive={location.pathname === '/daily-card'}
+        as={motion.div}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ y: -5 }}
+      >
+        <NavIcon className="material-symbols-rounded">auto_awesome</NavIcon>
+        <NavText>Дневная</NavText>
+      </NavLink>
       
-      <NavItem to="/daily">
-        <NavIcon className="material-symbols-outlined">today</NavIcon>
-        <NavText>Daily</NavText>
-      </NavItem>
+      <NavLink 
+        to="/spreads" 
+        $isActive={location.pathname === '/spreads' || location.pathname.startsWith('/spreads/')}
+        as={motion.div}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ y: -5 }}
+      >
+        <NavIcon className="material-symbols-rounded">grid_view</NavIcon>
+        <NavText>Расклады</NavText>
+      </NavLink>
       
-      <NavItem to="/profile">
-        <NavIcon className="material-symbols-outlined">person</NavIcon>
-        <NavText>Profile</NavText>
-      </NavItem>
+      <NavLink 
+        to="/profile" 
+        $isActive={location.pathname === '/profile'}
+        as={motion.div}
+        whileTap={{ scale: 0.9 }}
+        whileHover={{ y: -5 }}
+      >
+        <NavIcon className="material-symbols-rounded">person</NavIcon>
+        <NavText>Профиль</NavText>
+      </NavLink>
     </NavbarContainer>
   );
 };
 
 const NavbarContainer = styled.nav`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 100%;
-  height: var(--navbar-height);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  background: rgba(18, 18, 31, 0.8);
+  right: 0;
+  height: 70px;
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(155, 89, 217, 0.2);
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
 `;
 
-const NavItem = styled(NavLink)`
+const NavLink = styled(Link)`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  flex: 1;
   text-decoration: none;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
-  padding: 0.5rem;
+  color: ${props => props.$isActive ? 'var(--primary)' : 'var(--text-secondary)'};
+  height: 100%;
+  position: relative;
+  transition: color 0.3s ease;
   
-  &.active {
-    color: var(--primary);
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    height: 3px;
+    border-radius: 0 0 var(--radius-full) var(--radius-full);
+    background: ${props => props.$isActive ? 'var(--gradient-primary)' : 'transparent'};
+    opacity: ${props => props.$isActive ? 1 : 0};
+    transition: opacity 0.3s ease;
   }
   
-  &:active {
-    transform: scale(0.95);
+  &:hover {
+    color: var(--primary);
   }
 `;
 
 const NavIcon = styled.span`
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
+  font-size: 24px;
+  margin-bottom: 4px;
+  transition: transform 0.3s ease;
 `;
 
 const NavText = styled.span`
-  font-size: 0.7rem;
-  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
 `;
 
 export default MobileNavbar; 

@@ -1,41 +1,90 @@
 import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const MobileHeader = () => {
+  const location = useLocation();
+  
+  // Определяем заголовок страницы на основе текущего пути
+  const getPageTitle = () => {
+    const path = location.pathname;
+    
+    if (path === '/') return 'Главная';
+    if (path === '/cards') return 'Библиотека карт';
+    if (path === '/daily-card') return 'Карта дня';
+    if (path === '/spreads') return 'Расклады';
+    if (path.startsWith('/spreads/')) return 'Просмотр расклада';
+    if (path === '/profile') return 'Профиль';
+    if (path === '/about') return 'О проекте';
+    if (path === '/login') return 'Вход';
+    if (path === '/register') return 'Регистрация';
+    
+    return 'Таро Инсайт';
+  };
+  
   return (
     <HeaderContainer>
-      <Logo to="/">Mystic Tarot</Logo>
+      <LogoLink to="/">
+        <LogoText>
+          <LogoIcon>✨</LogoIcon>
+          <span>Таро Инсайт</span>
+        </LogoText>
+      </LogoLink>
+      
+      <PageTitle
+        as={motion.h1}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        key={location.pathname}
+      >
+        {getPageTitle()}
+      </PageTitle>
     </HeaderContainer>
   );
 };
 
 const HeaderContainer = styled.header`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: var(--header-height);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0 1rem;
-  z-index: 100;
-  background: rgba(18, 18, 31, 0.8);
+  padding: 15px 20px;
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(155, 89, 217, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid var(--border);
 `;
 
-const Logo = styled(Link)`
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 600;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+const LogoLink = styled(Link)`
   text-decoration: none;
+  color: inherit;
+  margin-bottom: 5px;
+`;
+
+const LogoText = styled.div`
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const LogoIcon = styled.span`
+  margin-right: 5px;
+  font-size: 1.4rem;
+`;
+
+const PageTitle = styled.h1`
+  font-size: 1.3rem;
+  margin: 0;
+  font-weight: 600;
+  color: var(--text);
 `;
 
 export default MobileHeader; 

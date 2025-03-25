@@ -62,92 +62,42 @@ export const updateUserProfile = async (profileData) => {
 // Используем данные из tarotData.js вместо демо данных
 const demoCards = tarotCards.slice(0, 10);
 
-export const getCards = async (filters = {}) => {
-  let query = supabase
-    .from('cards')
-    .select('*');
+// Для демонстрационных целей используем фейковые асинхронные функции,
+// которые имитируют вызовы к Supabase API
 
-  // Apply filters if provided
-  if (filters.type) {
-    query = query.eq('type', filters.type);
+/**
+ * Получить все карты из базы данных
+ * @returns {Promise} Промис с данными карт
+ */
+export const getCards = async () => {
+  try {
+    // Имитация задержки сети
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // В реальном приложении здесь был бы запрос к Supabase
+    return { data: [], error: null };
+  } catch (error) {
+    console.error('Error fetching cards:', error);
+    return { data: null, error };
   }
-  
-  if (filters.suit) {
-    query = query.eq('suit', filters.suit);
-  }
-  
-  if (filters.search) {
-    query = query.ilike('name', `%${filters.search}%`);
-  }
-  
-  const { data, error } = await query;
-  
-  // Return tarot cards data if no data from Supabase
-  if (!data || data.length === 0 || error) {
-    console.log("Using tarotData cards data");
-    
-    // Filter tarot cards to match the requested filters
-    let filteredCards = [...tarotCards];
-    
-    if (filters.type) {
-      filteredCards = filteredCards.filter(card => card.type === filters.type);
-    }
-    
-    if (filters.suit) {
-      filteredCards = filteredCards.filter(card => card.suit === filters.suit);
-    }
-    
-    if (filters.search) {
-      const searchTerm = filters.search.toLowerCase();
-      filteredCards = filteredCards.filter(card => 
-        card.name.toLowerCase().includes(searchTerm) ||
-        (card.keywords && card.keywords.join(' ').toLowerCase().includes(searchTerm)) ||
-        (card.description && card.description.toLowerCase().includes(searchTerm))
-      );
-    }
-    
-    return { data: filteredCards, error: null };
-  }
-  
-  return { data, error };
 };
 
+/**
+ * Получить карту по ID
+ * @param {string} id ID карты
+ * @returns {Promise} Промис с данными карты
+ */
 export const getCardById = async (id) => {
-  const { data, error } = await supabase
-    .from('cards')
-    .select('*')
-    .eq('id', id)
-    .single();
+  try {
+    // Имитация задержки сети
+    await new Promise(resolve => setTimeout(resolve, 600));
     
-  // Return a card from tarotData if no data from Supabase
-  if (!data || error) {
-    console.log("Using tarotData card data for ID:", id);
-    
-    // Преобразуем id в число если это строка
-    const numId = typeof id === 'string' ? parseInt(id) : id;
-    
-    // Сначала попробуем найти карту по id
-    const cardById = tarotCards.find(card => card.id === numId);
-    
-    if (cardById) {
-      return { data: cardById, error: null };
-    }
-    
-    // Если не нашли по id, ищем по имени карты Major Arcana с таким же номером
-    const majorCard = tarotCards.find(card => 
-      card.type === 'major' && card.number === String(numId)
-    );
-    
-    if (majorCard) {
-      return { data: majorCard, error: null };
-    }
-    
-    // Если ничего не нашли, возвращаем первую карту с измененным id
-    const fallbackCard = { ...tarotCards[0], id: numId };
-    return { data: fallbackCard, error: null };
+    // В реальном приложении здесь был бы запрос к Supabase
+    return { data: null, error: null };
+  } catch (error) {
+    console.error(`Error fetching card with id ${id}:`, error);
+    return { data: null, error };
   }
-  
-  return { data, error };
 };
 
 // ======= Spreads Functions =======
@@ -231,139 +181,78 @@ const demoSpreads = [
   }
 ];
 
+/**
+ * Получить все расклады
+ * @param {boolean} includePremium Включать ли премиум расклады
+ * @returns {Promise} Промис с данными раскладов
+ */
 export const getSpreads = async (includePremium = false) => {
-  let query = supabase
-    .from('spreads')
-    .select('*');
-  
-  if (!includePremium) {
-    query = query.eq('is_premium', false);
+  try {
+    // Имитация задержки сети
+    await new Promise(resolve => setTimeout(resolve, 700));
+    
+    // В реальном приложении здесь был бы запрос к Supabase
+    return { data: [], error: null };
+  } catch (error) {
+    console.error('Error fetching spreads:', error);
+    return { data: null, error };
   }
-  
-  const { data, error } = await query;
-  
-  // Return demo spreads if no data from Supabase
-  if (!data || data.length === 0 || error) {
-    console.log("Using demo spreads data");
-    
-    let filteredDemoSpreads = [...demoSpreads];
-    
-    if (!includePremium) {
-      filteredDemoSpreads = filteredDemoSpreads.filter(spread => !spread.is_premium);
-    }
-    
-    return { data: filteredDemoSpreads, error: null };
-  }
-  
-  return { data, error };
 };
 
+/**
+ * Получить расклад по ID
+ * @param {string} id ID расклада
+ * @returns {Promise} Промис с данными расклада
+ */
 export const getSpreadById = async (id) => {
-  const { data, error } = await supabase
-    .from('spreads')
-    .select(`
-      *,
-      positions (
-        id, name, description
-      )
-    `)
-    .eq('id', id)
-    .single();
+  try {
+    // Имитация задержки сети
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-  // Return a demo spread if no data from Supabase
-  if (!data || error) {
-    console.log("Using demo spread data for ID:", id);
-    const demoSpread = demoSpreads.find(spread => spread.id.toString() === id.toString());
-    
-    if (demoSpread) {
-      return { data: demoSpread, error: null };
-    } else {
-      // If no matching demo spread, create a fallback
-      return { 
-        data: {
-          id: parseInt(id),
-          name: `Mystery Spread #${id}`,
-          description: "This unique spread configuration helps illuminate hidden aspects of your question.",
-          card_count: 3,
-          is_premium: false,
-          image_url: "https://i.imgur.com/pqXvnBl.jpg",
-          positions: [
-            { id: 1, name: "Past", description: "Influences from the past" },
-            { id: 2, name: "Present", description: "Current situation" },
-            { id: 3, name: "Future", description: "Potential outcome" }
-          ]
-        }, 
-        error: null 
-      };
-    }
+    // В реальном приложении здесь был бы запрос к Supabase
+    return { data: null, error: null };
+  } catch (error) {
+    console.error(`Error fetching spread with id ${id}:`, error);
+    return { data: null, error };
   }
-  
-  return { data, error };
 };
 
 // ======= Readings Functions =======
 
-export const saveReading = async (userId, spreadId, cards, notes = '') => {
-  // First create a reading record
-  const { data: readingData, error: readingError } = await supabase
-    .from('readings')
-    .insert([
-      {
-        user_id: userId,
-        spread_id: spreadId,
-        notes: notes
-      }
-    ])
-    .select();
-  
-  if (readingError) {
-    return { error: readingError };
+/**
+ * Сохранить результат расклада
+ * @param {object} readingData Данные расклада
+ * @returns {Promise} Промис с результатом операции
+ */
+export const saveReading = async (readingData) => {
+  try {
+    // Имитация задержки сети
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // В реальном приложении здесь был бы запрос к Supabase
+    return { data: { id: 'new-reading-id' }, error: null };
+  } catch (error) {
+    console.error('Error saving reading:', error);
+    return { data: null, error };
   }
-
-  const readingId = readingData[0].id;
-  
-  // Format cards data to include reading_id
-  const readingCardsData = cards.map(card => ({
-    reading_id: readingId,
-    card_id: card.card_id,
-    position_id: card.position,
-    orientation: card.orientation
-  }));
-  
-  // Insert cards for the reading
-  const { data: cardsData, error: cardsError } = await supabase
-    .from('reading_cards')
-    .insert(readingCardsData);
-  
-  if (cardsError) {
-    return { error: cardsError };
-  }
-  
-  return { data: readingData };
 };
 
+/**
+ * Получить все сохраненные расклады пользователя
+ * @param {string} userId ID пользователя
+ * @returns {Promise} Промис с данными сохраненных раскладов
+ */
 export const getUserReadings = async (userId) => {
-  return await supabase
-    .from('readings')
-    .select(`
-      *,
-      spread:spread_id (
-        id, name, description, image_url
-      ),
-      reading_cards (
-        id,
-        position_id,
-        orientation,
-        position:position_id (
-          id, name, description
-        ),
-        card:card_id (
-          id, name, image_url, upright_meaning, reversed_meaning
-        )
-      )
-    `)
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+  try {
+    // Имитация задержки сети
+    await new Promise(resolve => setTimeout(resolve, 700));
+    
+    // В реальном приложении здесь был бы запрос к Supabase
+    return { data: [], error: null };
+  } catch (error) {
+    console.error(`Error fetching readings for user ${userId}:`, error);
+    return { data: null, error };
+  }
 };
 
 export const getReadingById = async (id) => {
@@ -410,35 +299,22 @@ export const deleteReading = async (id) => {
 
 // ======= Daily Card Functions =======
 
-export const getDailyCard = async (userId, date) => {
-  // Format date to YYYY-MM-DD for consistent querying
-  const formattedDate = new Date(date).toISOString().split('T')[0];
-  
-  // Check if there's an existing daily card for this user/date
-  const { data: existingData, error: existingError } = await supabase
-    .from('daily_cards')
-    .select(`
-      *,
-      card:card_id (
-        id, name, image_url, type, suit, upright_meaning, reversed_meaning
-      )
-    `)
-    .eq('user_id', userId)
-    .eq('date', formattedDate)
-    .single();
-  
-  if (existingError && existingError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
-    // Return demo data if there's an error
-    return getDemoDailyCard();
+/**
+ * Получить дневную карту пользователя
+ * @param {string} userId ID пользователя
+ * @returns {Promise} Промис с данными дневной карты
+ */
+export const getDailyCard = async (userId) => {
+  try {
+    // Имитация задержки сети
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    // В реальном приложении здесь был бы запрос к Supabase
+    return { data: null, error: null };
+  } catch (error) {
+    console.error(`Error fetching daily card for user ${userId}:`, error);
+    return { data: null, error };
   }
-  
-  // If found, return it
-  if (existingData) {
-    return { data: existingData };
-  }
-  
-  // For demo purposes, always return a nice demo card
-  return getDemoDailyCard();
 };
 
 // Helper function to get a demo daily card
@@ -460,11 +336,24 @@ const getDemoDailyCard = () => {
   return { data: dailyCard };
 };
 
-export const saveDailyCardReflection = async (dailyCardId, reflection) => {
-  return await supabase
-    .from('daily_cards')
-    .update({ reflection })
-    .eq('id', dailyCardId);
+/**
+ * Сохранить рефлексию пользователя для дневной карты
+ * @param {string} userId ID пользователя
+ * @param {string} cardId ID карты
+ * @param {string} reflection Текст рефлексии
+ * @returns {Promise} Промис с результатом операции
+ */
+export const saveDailyReflection = async (userId, cardId, reflection) => {
+  try {
+    // Имитация задержки сети
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // В реальном приложении здесь был бы запрос к Supabase
+    return { data: { success: true }, error: null };
+  } catch (error) {
+    console.error(`Error saving reflection for user ${userId}:`, error);
+    return { data: null, error };
+  }
 };
 
 // ======= Subscription Functions =======
