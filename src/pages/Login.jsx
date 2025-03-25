@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { loginUser, clearError } from '../store/slices/authSlice';
+import { loginUser, clearAuthError } from '../store/slices/authSlice';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -24,8 +24,15 @@ const Login = () => {
     }
     
     // Clear any previous errors when component mounts
-    dispatch(clearError());
+    dispatch(clearAuthError());
   }, [isAuthenticated, navigate, location, dispatch]);
+  
+  useEffect(() => {
+    // Очищаем ошибки при размонтировании компонента
+    return () => {
+      dispatch(clearAuthError());
+    };
+  }, [dispatch]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,7 +43,7 @@ const Login = () => {
     
     // Clear any API error when user changes form
     if (error) {
-      dispatch(clearError());
+      dispatch(clearAuthError());
     }
   };
   

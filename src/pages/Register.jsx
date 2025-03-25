@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { registerUser, clearAuthError } from '../store/slices/authSlice';
+import { useDispatch } from 'react-redux';
 
 const Register = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: 'Демо Пользователь',
     email: 'demo@example.com',
@@ -13,6 +16,11 @@ const Register = () => {
   
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  
+  useEffect(() => {
+    // Clear any previous errors when component mounts
+    dispatch(clearAuthError());
+  }, [dispatch]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
