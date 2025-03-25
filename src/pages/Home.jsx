@@ -5,13 +5,31 @@ import { motion } from 'framer-motion';
 
 const Home = () => {
   const [isMobile, setIsMobile] = useState(false);
+  const [deviceOS, setDeviceOS] = useState('');
 
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth <= 767);
     };
     
+    // Определение операционной системы
+    const detectOS = () => {
+      const userAgent = window.navigator.userAgent;
+      if (/iPhone|iPad|iPod/.test(userAgent)) {
+        setDeviceOS('iOS');
+      } else if (/Android/.test(userAgent)) {
+        setDeviceOS('Android');
+      } else if (/Mac/.test(userAgent)) {
+        setDeviceOS('macOS');
+      } else if (/Win/.test(userAgent)) {
+        setDeviceOS('Windows');
+      } else {
+        setDeviceOS('Unknown');
+      }
+    };
+    
     checkIfMobile();
+    detectOS();
     window.addEventListener('resize', checkIfMobile);
     
     return () => {
@@ -38,9 +56,37 @@ const Home = () => {
           <HeroSubtitle>
             Исследуйте древнюю мудрость карт Таро с помощью нашего современного и интуитивного приложения
           </HeroSubtitle>
+          
+          {isMobile && (
+            <OSBadge
+              as={motion.div}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <span className="material-symbols-rounded">
+                {deviceOS === 'Android' ? 'android' : 
+                deviceOS === 'iOS' ? 'apple' :
+                deviceOS === 'Windows' ? 'laptop_windows' : 
+                deviceOS === 'macOS' ? 'laptop_mac' : 'devices'}
+              </span>
+              <span>Оптимизировано для {deviceOS}</span>
+            </OSBadge>
+          )}
+          
           <HeroButtonsContainer>
+            {isMobile && (
+              <HeroButton 
+                className="primary-button"
+                as={motion.div}
+                whileHover={{ y: -5, boxShadow: '0 10px 25px rgba(155, 89, 217, 0.5)' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link to="/login">Войти</Link>
+              </HeroButton>
+            )}
             <HeroButton 
-              className="primary-button"
+              className={isMobile ? "secondary-button" : "primary-button"}
               as={motion.div}
               whileHover={{ y: -5, boxShadow: '0 10px 25px rgba(155, 89, 217, 0.5)' }}
               whileTap={{ scale: 0.95 }}
@@ -501,6 +547,25 @@ const CTAButton = styled.div`
       padding: 0.9rem 2.5rem;
       font-size: 1rem;
     }
+  }
+`;
+
+const OSBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  backdrop-filter: blur(5px);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .material-symbols-rounded {
+    font-size: 18px;
+    color: var(--primary);
   }
 `;
 
