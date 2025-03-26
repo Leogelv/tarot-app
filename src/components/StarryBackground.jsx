@@ -1,97 +1,65 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 
 const StarryBackground = () => {
   const canvasRef = useRef(null);
-
+  
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let animationFrameId;
-    let stars = [];
-
-    // Настройка размера канваса
-    const handleResize = () => {
+    
+    const setCanvasSize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      initStars(); // Пересоздаем звезды при изменении размера
     };
-
-    window.addEventListener('resize', handleResize);
-    handleResize();
-
-    // Создание звезд
-    function initStars() {
+    
+    window.addEventListener('resize', setCanvasSize);
+    setCanvasSize();
+    
+    // Create stars
+    let stars = [];
+    const createStars = () => {
       stars = [];
-      const numberOfStars = Math.floor((canvas.width * canvas.height) / 10000); // Адаптивное количество звезд
+      const starCount = 100;
       
-      for (let i = 0; i < numberOfStars; i++) {
+      for (let i = 0; i < starCount; i++) {
         stars.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          size: Math.random() * 2,
-          brightness: Math.random(),
-          speed: Math.random() * 0.05,
-          angle: Math.random() * Math.PI * 2
+          size: Math.random() * 2 + 0.5,
+          opacity: Math.random() * 0.8 + 0.2
         });
       }
-    }
-
-    // Анимация звезд
-    function animate() {
-      ctx.fillStyle = 'rgba(18, 18, 31, 0.1)'; // Цвет фона с небольшим следом
+    };
+    
+    createStars();
+    
+    // Animation
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#12121f';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+      
+      // Draw stars
       stars.forEach(star => {
-        // Обновление яркости
-        star.brightness += star.speed;
-        if (star.brightness > 1) {
-          star.brightness = 0;
-        }
-
-        // Рисуем звезду
-        const opacity = star.brightness;
-        const size = star.size * (0.5 + star.brightness * 0.5);
-
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-        ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
         ctx.fill();
-
-        // Добавляем свечение
-        const gradient = ctx.createRadialGradient(
-          star.x, star.y, 0,
-          star.x, star.y, size * 2
-        );
-        gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity * 0.5})`);
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        
-        ctx.fillStyle = gradient;
-        ctx.arc(star.x, star.y, size * 2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Медленное движение звезд
-        star.x += Math.cos(star.angle) * 0.1;
-        star.y += Math.sin(star.angle) * 0.1;
-
-        // Возвращаем звезды в пределы экрана
-        if (star.x < 0) star.x = canvas.width;
-        if (star.x > canvas.width) star.x = 0;
-        if (star.y < 0) star.y = canvas.height;
-        if (star.y > canvas.height) star.y = 0;
       });
-
+      
       animationFrameId = requestAnimationFrame(animate);
-    }
-
+    };
+    
     animate();
-
+    
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', setCanvasSize);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
-
+  
   return <Canvas ref={canvasRef} />;
 };
 
@@ -102,7 +70,7 @@ const Canvas = styled.canvas`
   width: 100%;
   height: 100%;
   z-index: -1;
-  pointer-events: none;
+  display: block;
 `;
 
 export default StarryBackground; 
