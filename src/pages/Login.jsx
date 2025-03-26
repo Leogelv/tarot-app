@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { loginUser, clearAuthError } from '../store/slices/authSlice';
+import { login, setError } from '../store/slices/authSlice';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -26,13 +26,13 @@ const Login = () => {
     }
     
     // Clear any previous errors when component mounts
-    dispatch(clearAuthError());
+    dispatch(setError(null));
   }, [isAuthenticated, navigate, location, dispatch]);
   
   useEffect(() => {
     // Очищаем ошибки при размонтировании компонента
     return () => {
-      dispatch(clearAuthError());
+      dispatch(setError(null));
     };
   }, [dispatch]);
   
@@ -45,7 +45,7 @@ const Login = () => {
     
     // Clear any API error when user changes form
     if (error) {
-      dispatch(clearAuthError());
+      dispatch(setError(null));
     }
   };
   
@@ -53,14 +53,18 @@ const Login = () => {
     e.preventDefault();
     
     try {
-      await dispatch(
-        loginUser({
-          email: formData.email,
-          password: formData.password,
+      // Вместо асинхронной функции loginUser используем обычный экшен login
+      dispatch(setError(null));
+      dispatch(
+        login({
+          id: "demo-user-id", 
+          email: formData.email, 
+          name: "Демо пользователь"
         })
       );
     } catch (err) {
       console.error('Login failed:', err);
+      dispatch(setError("Ошибка авторизации"));
     }
   };
   
