@@ -1,36 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { registerUser, clearErrors } from '../store/slices/authSlice';
-import { useDispatch, useSelector } from 'react-redux';
 
 const Register = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { status, error, isAuthenticated } = useSelector((state) => state.auth);
-  const loading = status === 'loading';
-  
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-  });
-  
+  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   
-  // Если пользователь авторизован, перенаправляем на профиль
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/profile');
-    }
-  }, [isAuthenticated, navigate]);
-  
-  useEffect(() => {
-    // Clear any previous errors when component mounts
-    dispatch(clearErrors());
-  }, [dispatch]);
+  const [formData, setFormData] = useState({
+    name: 'Пользователь',
+    email: 'user@example.com',
+    password: 'password123',
+    confirmPassword: 'password123',
+  });
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,14 +21,9 @@ const Register = () => {
       ...formData,
       [name]: value,
     });
-    
-    // Очищаем ошибки при изменении данных формы
-    if (error) {
-      dispatch(clearErrors());
-    }
   };
   
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
@@ -53,28 +31,18 @@ const Register = () => {
       return;
     }
     
-    try {
-      await dispatch(
-        registerUser({
-          email: formData.email,
-          password: formData.password,
-          userData: {
-            name: formData.name
-          }
-        })
-      );
-      
+    setLoading(true);
+    
+    // Имитируем загрузку
+    setTimeout(() => {
+      setLoading(false);
       setSuccess(true);
       
-      // Перенаправляем на страницу логина через 2 секунды
+      // Перенаправляем на страницу карт через 2 секунды
       setTimeout(() => {
-        navigate('/login', { 
-          state: { message: 'Регистрация успешна! Теперь вы можете войти.' } 
-        });
-      }, 2000);
-    } catch (err) {
-      console.error('Ошибка регистрации:', err);
-    }
+        navigate('/cards');
+      }, 1000);
+    }, 800);
   };
   
   if (success) {
@@ -92,7 +60,7 @@ const Register = () => {
           transition={{ type: "spring", stiffness: 200, damping: 10, delay: 0.2 }}
         >✓</SuccessIcon>
         <SuccessTitle>Регистрация успешна!</SuccessTitle>
-        <SuccessMessage>Перенаправляем вас на страницу входа...</SuccessMessage>
+        <SuccessMessage>Перенаправляем вас в библиотеку...</SuccessMessage>
       </SuccessContainer>
     );
   }
@@ -109,8 +77,6 @@ const Register = () => {
           <FormTitle>Создайте аккаунт</FormTitle>
           <FormSubtitle>Присоединяйтесь к миру Таро</FormSubtitle>
         </FormHeader>
-        
-        {error && <ErrorMessage>{error}</ErrorMessage>}
         
         <RegisterForm onSubmit={handleSubmit}>
           <FormGroup>
@@ -392,15 +358,6 @@ const SuccessTitle = styled.h2`
 const SuccessMessage = styled.p`
   font-size: 1.1rem;
   color: var(--text-secondary);
-`;
-
-const ErrorMessage = styled.div`
-  background-color: rgba(255, 0, 0, 0.1);
-  color: #e74c3c;
-  padding: 1rem;
-  border-radius: var(--radius);
-  margin-bottom: 1.5rem;
-  font-weight: 500;
 `;
 
 export default Register; 

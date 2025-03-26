@@ -264,10 +264,17 @@ const Card3DContainer = styled.div`
 `;
 
 const LibraryContainer = styled.div`
+  margin: 0;
+  padding: 0;
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem;
+  width: 100%;
   position: relative;
+  z-index: 1;
+  
+  @media (max-width: 768px) {
+    margin-top: 0;
+    padding-top: 0;
+  }
 `;
 
 const BlobBackground = styled.div`
@@ -317,9 +324,14 @@ const Blob = styled.div`
   }
 `;
 
-const LibraryHeader = styled.header`
+const LibraryHeader = styled.div`
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    margin-top: 0;
+    padding-top: 0;
+  }
 `;
 
 const HeaderTitle = styled.h1`

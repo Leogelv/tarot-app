@@ -1,40 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { loginUser, clearErrors } from '../store/slices/authSlice';
 
 const Login = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-  const { status, error, isAuthenticated } = useSelector((state) => state.auth);
-  const loading = status === 'loading';
+  const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     email: 'demo@example.com',
     password: 'password123',
   });
-  
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      // Redirect to intended page or profile
-      const from = location.state?.from?.pathname || '/profile';
-      navigate(from);
-    }
-    
-    // Clear any previous errors when component mounts
-    dispatch(clearErrors());
-  }, [isAuthenticated, navigate, location, dispatch]);
-  
-  useEffect(() => {
-    // Очищаем ошибки при размонтировании компонента
-    return () => {
-      dispatch(clearErrors());
-    };
-  }, [dispatch]);
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,26 +18,18 @@ const Login = () => {
       ...formData,
       [name]: value,
     });
-    
-    // Clear any API error when user changes form
-    if (error) {
-      dispatch(clearErrors());
-    }
   };
   
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setLoading(true);
     
-    try {
-      await dispatch(
-        loginUser({
-          email: formData.email,
-          password: formData.password,
-        })
-      );
-    } catch (err) {
-      console.error('Login failed:', err);
-    }
+    // Имитация загрузки
+    setTimeout(() => {
+      setLoading(false);
+      // Сразу переходим в каталог карт
+      navigate('/cards');
+    }, 800);
   };
   
   return (
@@ -77,8 +45,6 @@ const Login = () => {
             <FormTitle>Вход в аккаунт</FormTitle>
             <FormSubtitle>Добро пожаловать в Таро Инсайт</FormSubtitle>
           </FormHeader>
-          
-          {error && <ErrorMessage>{error}</ErrorMessage>}
           
           <FormGroup>
             <Label htmlFor="email">Email</Label>
@@ -286,15 +252,6 @@ const FormImage = styled.img`
   max-height: 450px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-`;
-
-const ErrorMessage = styled.div`
-  background-color: rgba(255, 0, 0, 0.1);
-  color: #e74c3c;
-  padding: 1rem;
-  border-radius: var(--radius);
-  margin-bottom: 1.5rem;
-  font-weight: 500;
 `;
 
 export default Login; 
