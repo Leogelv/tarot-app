@@ -1,23 +1,41 @@
 import React from 'react';
 import styled from 'styled-components';
+import { QRCodeSVG } from 'qrcode.react';
+import { motion } from 'framer-motion';
 
 const DesktopPlaceholder = () => {
+  const appUrl = window.location.origin;
+
   return (
-    <Container>
+    <Container
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <Content>
         <Title>Таро Инсайт</Title>
         <Subtitle>
           Это приложение оптимизировано для мобильных устройств
         </Subtitle>
+        <QRContainer>
+          <QRCodeSVG 
+            value={appUrl}
+            size={200}
+            level="H"
+            includeMargin={true}
+            bgColor="#12121f"
+            fgColor="#ffffff"
+          />
+        </QRContainer>
         <Instructions>
-          Пожалуйста, откройте это приложение на вашем телефоне для наилучшего опыта
+          Отсканируйте QR-код чтобы открыть приложение на вашем телефоне
         </Instructions>
       </Content>
     </Container>
   );
 };
 
-const Container = styled.div`
+const Container = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,6 +67,15 @@ const Subtitle = styled.p`
   font-size: 1.2rem;
   margin-bottom: 2rem;
   opacity: 0.8;
+`;
+
+const QRContainer = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  display: inline-block;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 `;
 
 const Instructions = styled.p`
