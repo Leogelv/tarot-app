@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { Outlet, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
@@ -10,39 +10,24 @@ import Footer from './Footer';
 import PageTransition from '../effects/PageTransition';
 import DesktopPlaceholder from '../DesktopPlaceholder';
 import StarryBackground from '../StarryBackground';
+import useUI from '../../hooks/useUI';
 
 // Main layout component that wraps all pages
-const MainLayout = () => {
+const MainLayout = ({ children }) => {
   const location = useLocation();
-  const [isMobile, setIsMobile] = useState(false);
+  const { isMobile } = useUI();
   const { isAuthenticated, status } = useSelector(state => state.auth);
   
   // Определяем, показывать ли десктопную заглушку
   const showDesktopPlaceholder = !isMobile && !window.location.pathname.includes('/admin');
   
-  // Check if device is mobile
+  // Add body class for mobile styling
   useEffect(() => {
-    const checkDeviceType = () => {
-      setIsMobile(window.innerWidth <= 767);
-    };
-    
-    // Initial check
-    checkDeviceType();
-    
-    // Listen for window resize
-    window.addEventListener('resize', checkDeviceType);
-    
-    // Add body class for mobile styling
     if (isMobile) {
       document.body.classList.add('mobile-view');
     } else {
       document.body.classList.remove('mobile-view');
     }
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', checkDeviceType);
-    };
   }, [isMobile]);
   
   // Если находимся в профиле, но не авторизованы - редирект на логин
@@ -68,7 +53,7 @@ const MainLayout = () => {
       <MainContent className="main-content" $isMobile={isMobile}>
         <AnimatePresence mode="wait">
           <PageTransition key={location.pathname}>
-            <Outlet />
+            {children}
           </PageTransition>
         </AnimatePresence>
       </MainContent>

@@ -1,74 +1,28 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { signIn, signUp, signOut, getCurrentUser, getUserProfile } from '../../services/supabase/supabaseClient';
 
-// Initial state
+// Начальное состояние
 const initialState = {
   user: null,
-  profile: null,
-  token: localStorage.getItem('token') || null,
+  isAuthenticated: false,
+  isSubscribed: false,
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-  error: null,
-  isAuthenticated: false
+  error: null
 };
 
-// Async thunks
-export const loginUser = createAsyncThunk(
-  'auth/login',
-  async ({ email, password }, { rejectWithValue }) => {
-    try {
-      const response = await signIn(email, password);
-      
-      if (response.error) {
-        return rejectWithValue(response.error.message);
-      }
-      
-      const token = response.data.session?.access_token;
-      
-      if (token) {
-        localStorage.setItem('token', token);
-      }
-      
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const registerUser = createAsyncThunk(
-  'auth/register',
-  async ({ email, password, userData }, { rejectWithValue }) => {
-    try {
-      const response = await signUp(email, password, userData);
-      
-      if (response.error) {
-        return rejectWithValue(response.error.message);
-      }
-      
-      const token = response.data.session?.access_token;
-      
-      if (token) {
-        localStorage.setItem('token', token);
-      }
-      
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
-
-export const logoutUser = createAsyncThunk(
-  'auth/logout',
+// Асинхронное действие для проверки текущего пользователя
+export const fetchCurrentUser = createAsyncThunk(
+  'auth/fetchCurrentUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await signOut();
+      // Имитация запроса API с задержкой
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      if (response.error) {
-        return rejectWithValue(response.error.message);
+      // Проверяем наличие пользователя в localStorage
+      const userData = localStorage.getItem('tarot_user');
+      
+      if (userData) {
+        return JSON.parse(userData);
       }
-      
-      localStorage.removeItem('token');
       
       return null;
     } catch (error) {
@@ -77,120 +31,137 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-export const fetchCurrentUser = createAsyncThunk(
-  'auth/fetchCurrentUser',
-  async (_, { rejectWithValue }) => {
+// Асинхронное действие для входа пользователя
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (credentials, { rejectWithValue }) => {
     try {
-      const response = await getCurrentUser();
+      // Имитация запроса API с задержкой
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      if (response.error) {
-        return rejectWithValue(response.error.message);
+      // Для демонстрации - простая проверка email/password
+      if (credentials.email === 'demo@example.com' && credentials.password === 'password') {
+        const user = {
+          id: 'user-1',
+          email: credentials.email,
+          name: 'Demo User',
+          isSubscribed: false
+        };
+        
+        // Сохраняем в localStorage
+        localStorage.setItem('tarot_user', JSON.stringify(user));
+        
+        return user;
       }
       
-      if (!response.data.user) {
-        return rejectWithValue('User not authenticated');
-      }
-      
-      // Get user profile
-      const profileResponse = await getUserProfile(response.data.user.id);
-      
-      if (profileResponse.error) {
-        return rejectWithValue(profileResponse.error.message);
-      }
-      
-      return {
-        user: response.data.user,
-        profile: profileResponse.data
-      };
+      return rejectWithValue('Неверный email или пароль');
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Slice
+// Асинхронное действие для регистрации
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (userData, { rejectWithValue }) => {
+    try {
+      // Имитация запроса API с задержкой
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      const user = {
+        id: `user-${Date.now()}`,
+        email: userData.email,
+        name: userData.name,
+        isSubscribed: false
+      };
+      
+      // Сохраняем в localStorage
+      localStorage.setItem('tarot_user', JSON.stringify(user));
+      
+      return user;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Асинхронное действие для выхода
+export const logoutUser = createAsyncThunk(
+  'auth/logoutUser',
+  async () => {
+    // Удаляем из localStorage
+    localStorage.removeItem('tarot_user');
+    return null;
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    clearAuthError: (state) => {
+    clearErrors: (state) => {
       state.error = null;
-    },
-    setAuthStatus: (state, action) => {
-      state.status = action.payload;
     }
   },
   extraReducers: (builder) => {
     builder
-      // Login
+      // Обработка проверки текущего пользователя
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.user = action.payload;
+        state.isAuthenticated = !!action.payload;
+        state.isSubscribed = action.payload?.isSubscribed || false;
+      })
+      .addCase(fetchCurrentUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
+      })
+      
+      // Обработка входа
       .addCase(loginUser.pending, (state) => {
         state.status = 'loading';
-        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.user = action.payload.user;
-        state.token = action.payload.session?.access_token;
+        state.user = action.payload;
         state.isAuthenticated = true;
+        state.isSubscribed = action.payload.isSubscribed;
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       })
       
-      // Register
+      // Обработка регистрации
       .addCase(registerUser.pending, (state) => {
         state.status = 'loading';
-        state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.user = action.payload.user;
-        state.token = action.payload.session?.access_token;
+        state.user = action.payload;
         state.isAuthenticated = true;
+        state.isSubscribed = false;
+        state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
       })
       
-      // Logout
-      .addCase(logoutUser.pending, (state) => {
-        state.status = 'loading';
-      })
+      // Обработка выхода
       .addCase(logoutUser.fulfilled, (state) => {
-        state.status = 'idle';
         state.user = null;
-        state.profile = null;
-        state.token = null;
         state.isAuthenticated = false;
-      })
-      .addCase(logoutUser.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.payload;
-      })
-      
-      // Fetch current user
-      .addCase(fetchCurrentUser.pending, (state) => {
-        state.status = 'loading';
-        state.error = null;
-      })
-      .addCase(fetchCurrentUser.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.user = action.payload.user;
-        state.profile = action.payload.profile;
-        state.isAuthenticated = true;
-      })
-      .addCase(fetchCurrentUser.rejected, (state, action) => {
-        state.status = 'idle';
-        state.user = null;
-        state.profile = null;
-        state.isAuthenticated = false;
-        state.error = action.payload;
+        state.isSubscribed = false;
       });
   }
 });
 
-export const { clearAuthError, setAuthStatus } = authSlice.actions;
+export const { clearErrors } = authSlice.actions;
 
 export default authSlice.reducer;
