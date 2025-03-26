@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import TarotDeck3D from '../components/effects/TarotDeck3D';
+import DeckOfCards from '../components/effects/DeckOfCards';
 
 // Моковые данные для карты дня
 const mockDailyCard = {
@@ -25,18 +25,17 @@ const DailyCard = () => {
   const [reflection, setReflection] = useState('');
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [showDeck3D, setShowDeck3D] = useState(true);
-  const [cardSelected, setCardSelected] = useState(false);
-  const [showFullCard, setShowFullCard] = useState(false);
-  const cardRef = useRef();
+  const [showCardInfo, setShowCardInfo] = useState(false);
   
   useEffect(() => {
     // Имитация загрузки карты дня
     const fetchDailyCard = async () => {
       try {
         setLoading(true);
-        // В этой версии карта будет выбрана через 3D колоду
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Имитация задержки сети
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Для демо используем моковые данные
         setCard(mockDailyCard);
       } catch (err) {
         console.error('Error fetching daily card:', err);
@@ -48,6 +47,13 @@ const DailyCard = () => {
     
     fetchDailyCard();
   }, []);
+  
+  const handleCardSelect = () => {
+    // Переход к информации о карте после выбора из колоды
+    setTimeout(() => {
+      setShowCardInfo(true);
+    }, 500);
+  };
   
   const handleSaveReflection = async () => {
     if (!reflection.trim()) return;
@@ -67,42 +73,36 @@ const DailyCard = () => {
       setSaveLoading(false);
     }
   };
-
-  const handleCardSelected = (selectedCard) => {
-    setCardSelected(true);
-    
-    // Плавно исчезает 3D колода через 1.5 секунды после выбора карты
-    setTimeout(() => {
-      setShowDeck3D(false);
-      
-      // Показываем карту с эффектом появления
-      setTimeout(() => {
-        setShowFullCard(true);
-      }, 500);
-    }, 1500);
-  };
   
-  const handleCardClick = () => {
-    if (showFullCard) {
-      // Анимируем переворот карты при клике
-      setIsFlipped(!isFlipped);
-    }
+  const handleStartOver = () => {
+    setShowCardInfo(false);
+    setTimeout(() => {
+      setShowCardInfo(false);
+      setIsFlipped(false);
+    }, 300);
   };
   
   return (
     <PageContainer className="page-container">
-      <BlobBackground>
-        <Blob className="blob-1" />
-        <Blob className="blob-2" />
-        <Blob className="blob-3" />
-      </BlobBackground>
-      
       <PageHeader>
         <PageTitle>Карта дня</PageTitle>
         <PageDescription>
           Ваше ежедневное таро-руководство для размышлений и осознания
         </PageDescription>
       </PageHeader>
+      
+      {loading && (
+        <LoadingContainer>
+          <div className="loading-spinner"></div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Подготавливаем колоду специально для вас...
+          </motion.p>
+        </LoadingContainer>
+      )}
       
       {error && (
         <ErrorMessage>
@@ -111,74 +111,67 @@ const DailyCard = () => {
         </ErrorMessage>
       )}
       
-      <AnimatePresence mode="wait">
-        {showDeck3D && (
-          <DeckContainer
-            key="deck3d"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <TarotDeck3D 
-              onCardSelected={handleCardSelected} 
-              cardData={card}
-            />
-            <DeckInstructions>
-              {!cardSelected ? 'Выберите карту дня из колоды' : 'Карта выбрана!'}
-            </DeckInstructions>
-          </DeckContainer>
-        )}
-        
-        {!showDeck3D && (
-          <ContentContainer
-            key="content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-          >
-            <AnimatePresence mode="wait">
-              {!showFullCard ? (
-                <LoadingCardContainer
-                  key="loading-card"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, scale: 1.5 }}
-                  transition={{ duration: 0.5 }}
+      {!loading && !error && card && (
+        <AnimatePresence mode="wait">
+          {!showCardInfo ? (
+            <motion.div
+              key="deck"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 0.5 }}
+            >
+              <DeckInstructions>
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
                 >
-                  <div className="loading-spinner"></div>
-                  <p>Проявляем вашу карту дня...</p>
-                </LoadingCardContainer>
-              ) : (
-                <CardSection
-                  key="card-section"
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ 
-                    type: "spring",
-                    damping: 15,
-                    stiffness: 200
-                  }}
-                >
-                  <CardRevealEffect>
-                    <CardRevealLight />
-                  </CardRevealEffect>
-                  
+                  Нажмите на верхнюю карту колоды, чтобы увидеть вашу карту дня
+                </motion.p>
+              </DeckInstructions>
+              
+              <DeckOfCards 
+                onSelectCard={handleCardSelect} 
+                cardTexture="https://www.trustedtarot.com/img/cards/card-back.png"
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="card-info"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              transition={{ duration: 0.5 }}
+            >
+              <ContentContainer>
+                <BackButton onClick={handleStartOver}>
+                  <span className="material-symbols-rounded">arrow_back</span>
+                  Вернуться к колоде
+                </BackButton>
+                
+                <CardSection>
                   <CardContainer
-                    ref={cardRef}
-                    onClick={handleCardClick}
-                    className="animated-float"
                     as={motion.div}
-                    whileHover={{ 
-                      y: -5,
-                      boxShadow: "0 20px 30px rgba(138, 43, 226, 0.3)"
+                    initial={{ opacity: 0, y: 30, rotateY: 180 }}
+                    animate={{ 
+                      opacity: 1, 
+                      y: 0, 
+                      rotateY: isFlipped ? 180 : 0,
+                      transition: { 
+                        type: "spring", 
+                        stiffness: 300, 
+                        damping: 20
+                      }
                     }}
+                    onClick={() => setIsFlipped(!isFlipped)}
+                    className="animated-float"
                   >
                     <CardInner $isFlipped={isFlipped}>
                       <CardFront>
                         <CardImage 
-                          src={card?.image_url} 
-                          alt={card?.name}
+                          src={card.image_url} 
+                          alt={card.name}
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = 'https://via.placeholder.com/500x800?text=Таро';
@@ -187,109 +180,92 @@ const DailyCard = () => {
                         <CardGlow />
                       </CardFront>
                       <CardBack>
-                        <CardTitle>{card?.name}</CardTitle>
-                        <CardNumber>{card?.number}</CardNumber>
+                        <CardTitle>{card.name}</CardTitle>
+                        <CardNumber>{card.number}</CardNumber>
                         <CardKeywords>
-                          {card?.keywords.map((keyword, index) => (
+                          {card.keywords.map((keyword, index) => (
                             <Keyword key={index}>{keyword}</Keyword>
                           ))}
                         </CardKeywords>
                         <CardText>
-                          <strong>Значение:</strong> {card?.description}
+                          <strong>Значение:</strong> {card.description}
                         </CardText>
                         <CardText>
-                          <strong>В прямом положении:</strong> {card?.meaning_upright}
+                          <strong>В прямом положении:</strong> {card.meaning_upright}
                         </CardText>
                         <CardText>
-                          <strong>В перевернутом положении:</strong> {card?.meaning_reversed}
+                          <strong>В перевернутом положении:</strong> {card.meaning_reversed}
                         </CardText>
                       </CardBack>
                     </CardInner>
                     <FlipHint>Нажмите, чтобы {isFlipped ? 'увидеть карту' : 'прочитать значение'}</FlipHint>
                   </CardContainer>
                 </CardSection>
-              )}
-            </AnimatePresence>
-            
-            {showFullCard && (
-              <InfoSection
-                as={motion.div}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-              >
-                <TodayInfo className="glass-card">
-                  <SectionTitle>Ваша карта на {new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</SectionTitle>
-                  <CardName>{card?.name}</CardName>
-                  <CardType>{card?.type === 'major' ? 'Старший Аркан' : 'Младший Аркан'} • {card?.number}</CardType>
-                  <CardDescription>{card?.description.substring(0, 150)}...</CardDescription>
-                  <CardMessage>
-                    <MessageTitle>Послание для вас:</MessageTitle>
-                    <Message>
-                      Карта Колесница приглашает вас взять под контроль ситуацию и двигаться вперед с уверенностью. 
-                      Сегодня благоприятный день для проявления силы воли и решимости. 
-                      Не позволяйте препятствиям останавливать вас — у вас есть все необходимые качества для их преодоления.
-                    </Message>
-                  </CardMessage>
-                </TodayInfo>
                 
-                <ReflectionSection className="glass-card">
-                  <SectionTitle>Ваши размышления</SectionTitle>
-                  <ReflectionPrompt>
-                    Запишите, какие мысли и чувства вызывает у вас эта карта. Как её значение резонирует с вашей текущей ситуацией?
-                  </ReflectionPrompt>
-                  <ReflectionInput
-                    placeholder="Запишите ваши мысли здесь..."
-                    value={reflection}
-                    onChange={(e) => setReflection(e.target.value)}
-                    rows={5}
-                  />
-                  <SaveButton 
-                    onClick={handleSaveReflection}
-                    disabled={saveLoading || !reflection.trim()}
-                    as={motion.button}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {saveLoading ? (
-                      <>
-                        <span className="spinner"></span>
-                        Сохранение...
-                      </>
-                    ) : (
-                      <>
-                        <span className="material-symbols-rounded">save</span>
-                        Сохранить
-                      </>
-                    )}
-                  </SaveButton>
+                <InfoSection
+                  as={motion.div}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                >
+                  <TodayInfo className="glass-card">
+                    <SectionTitle>Ваша карта на {new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}</SectionTitle>
+                    <CardName>{card.name}</CardName>
+                    <CardType>{card.type === 'major' ? 'Старший Аркан' : 'Младший Аркан'} • {card.number}</CardType>
+                    <CardDescription>{card.description.substring(0, 150)}...</CardDescription>
+                    <CardMessage>
+                      <MessageTitle>Послание для вас:</MessageTitle>
+                      <Message>
+                        Карта Колесница приглашает вас взять под контроль ситуацию и двигаться вперед с уверенностью. 
+                        Сегодня благоприятный день для проявления силы воли и решимости. 
+                        Не позволяйте препятствиям останавливать вас — у вас есть все необходимые качества для их преодоления.
+                      </Message>
+                    </CardMessage>
+                  </TodayInfo>
                   
-                  {saveSuccess && (
-                    <SuccessMessage>
-                      <span className="material-symbols-rounded">check_circle</span>
-                      Ваши размышления сохранены!
-                    </SuccessMessage>
-                  )}
-                </ReflectionSection>
-              </InfoSection>
-            )}
-          </ContentContainer>
-        )}
-      </AnimatePresence>
-      
-      <ShareCardButton
-        as={motion.button}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ 
-          opacity: showFullCard ? 1 : 0,
-          y: showFullCard ? 0 : 20
-        }}
-        whileHover={{ y: -3, scale: 1.03 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ delay: 1 }}
-      >
-        <span className="material-symbols-rounded">share</span>
-        Поделиться картой дня
-      </ShareCardButton>
+                  <ReflectionSection className="glass-card">
+                    <SectionTitle>Ваши размышления</SectionTitle>
+                    <ReflectionPrompt>
+                      Запишите, какие мысли и чувства вызывает у вас эта карта. Как её значение резонирует с вашей текущей ситуацией?
+                    </ReflectionPrompt>
+                    <ReflectionInput
+                      placeholder="Запишите ваши мысли здесь..."
+                      value={reflection}
+                      onChange={(e) => setReflection(e.target.value)}
+                      rows={5}
+                    />
+                    <SaveButton 
+                      onClick={handleSaveReflection}
+                      disabled={saveLoading || !reflection.trim()}
+                      as={motion.button}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {saveLoading ? (
+                        <>
+                          <span className="spinner"></span>
+                          Сохранение...
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-rounded">save</span>
+                          Сохранить
+                        </>
+                      )}
+                    </SaveButton>
+                    
+                    {saveSuccess && (
+                      <SuccessMessage>
+                        <span className="material-symbols-rounded">check_circle</span>
+                        Ваши размышления сохранены!
+                      </SuccessMessage>
+                    )}
+                  </ReflectionSection>
+                </InfoSection>
+              </ContentContainer>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </PageContainer>
   );
 };
@@ -298,65 +274,22 @@ const DailyCard = () => {
 const PageContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 1rem 1rem 8rem;
   position: relative;
 `;
 
-const BlobBackground = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-`;
-
-const Blob = styled.div`
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.07;
-  
-  &.blob-1 {
-    top: 10%;
-    left: 15%;
-    width: 300px;
-    height: 300px;
-    background: var(--primary);
-    animation: blob-float 15s ease-in-out infinite alternate;
-  }
-  
-  &.blob-2 {
-    bottom: 20%;
-    right: 15%;
-    width: 250px;
-    height: 250px;
-    background: var(--secondary);
-    animation: blob-float 18s ease-in-out infinite alternate;
-  }
-  
-  &.blob-3 {
-    top: 50%;
-    left: 40%;
-    width: 200px;
-    height: 200px;
-    background: var(--tertiary);
-    animation: blob-float 20s ease-in-out infinite alternate;
-  }
-`;
-
-const PageHeader = styled.header`
+const PageHeader = styled.div`
   text-align: center;
   margin-bottom: 2rem;
 `;
 
 const PageTitle = styled.h1`
   font-size: 2.5rem;
-  color: var(--text);
-  font-family: var(--font-heading);
   margin-bottom: 0.5rem;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: var(--font-heading);
   
   @media (max-width: 768px) {
     font-size: 2rem;
@@ -364,8 +297,8 @@ const PageTitle = styled.h1`
 `;
 
 const PageDescription = styled.p`
-  color: var(--text-secondary);
   font-size: 1.1rem;
+  color: var(--text-secondary);
   max-width: 600px;
   margin: 0 auto;
   
@@ -374,62 +307,14 @@ const PageDescription = styled.p`
   }
 `;
 
-const ErrorMessage = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: var(--error-bg);
-  color: var(--error);
-  padding: 1rem;
-  border-radius: var(--radius);
-  margin-bottom: 2rem;
-  
-  .material-symbols-rounded {
-    font-size: 1.5rem;
-  }
-`;
-
-const DeckContainer = styled(motion.div)`
-  margin: 0 auto;
-  width: 100%;
-  max-width: 800px;
-  height: 450px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  
-  @media (max-width: 768px) {
-    height: 400px;
-  }
-`;
-
-const DeckInstructions = styled.div`
-  position: absolute;
-  bottom: 20px;
-  left: 0;
-  right: 0;
-  text-align: center;
-  color: white;
-  font-size: 1.2rem;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
-  z-index: 10;
-`;
-
-const ContentContainer = styled(motion.div)`
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  width: 100%;
-`;
-
-const LoadingCardContainer = styled(motion.div)`
+const LoadingContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;
-  gap: 1rem;
+  padding: 5rem 1rem;
+  gap: 1.5rem;
+  text-align: center;
   
   p {
     color: var(--text-secondary);
@@ -437,95 +322,95 @@ const LoadingCardContainer = styled(motion.div)`
   }
 `;
 
-const CardSection = styled(motion.div)`
+const ErrorMessage = styled.div`
   display: flex;
-  justify-content: center;
-  position: relative;
-  min-height: 400px;
-  
-  @media (max-width: 768px) {
-    min-height: 350px;
-  }
-`;
-
-const CardRevealEffect = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1;
-  animation: cardReveal 1.5s ease-out;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid #f44336;
+  border-radius: var(--radius);
+  color: #f44336;
+  margin: 2rem 0;
+  text-align: center;
   
-  @keyframes cardReveal {
-    0% {
-      opacity: 1;
-      transform: scale(0.3);
-    }
-    50% {
-      opacity: 1;
-      transform: scale(1.5);
-    }
-    100% {
-      opacity: 0;
-      transform: scale(3);
-    }
+  .material-symbols-rounded {
+    font-size: 1.2rem;
   }
 `;
 
-const CardRevealLight = styled.div`
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(137, 86, 255, 0.8) 0%, rgba(137, 86, 255, 0) 70%);
-  border-radius: 50%;
-  animation: pulse 1.5s ease-out;
+const DeckInstructions = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
   
-  @keyframes pulse {
-    0% {
-      transform: scale(0.3);
-      opacity: 0.8;
-    }
-    100% {
-      transform: scale(3);
-      opacity: 0;
-    }
+  p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: var(--radius);
+    display: inline-block;
   }
+`;
+
+const ContentContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: var(--card-bg-hover);
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .material-symbols-rounded {
+    font-size: 1.1rem;
+  }
+`;
+
+const CardSection = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
 `;
 
 const CardContainer = styled.div`
   position: relative;
-  width: 280px;
-  height: 400px;
+  perspective: 1500px;
+  width: 300px;
+  height: 450px;
   cursor: pointer;
-  perspective: 1000px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-  border-radius: var(--radius);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  z-index: 2;
   
   &.animated-float {
-    animation: float 6s ease-in-out infinite;
+    animation: float 4s ease-in-out infinite;
   }
   
   @keyframes float {
-    0% {
-      transform: translateY(0);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-    100% {
-      transform: translateY(0);
-    }
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
   }
   
   @media (max-width: 768px) {
-    width: 220px;
-    height: 340px;
+    width: 250px;
+    height: 375px;
   }
 `;
 
@@ -533,9 +418,12 @@ const CardInner = styled.div`
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  transition: transform 0.8s;
   transform-style: preserve-3d;
-  transform: ${({ $isFlipped }) => $isFlipped ? 'rotateY(180deg)' : 'rotateY(0)'};
+  transform: ${props => props.$isFlipped ? 'rotateY(180deg)' : 'rotateY(0)'};
+  border-radius: var(--radius);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
 `;
 
 const CardFront = styled.div`
@@ -553,34 +441,20 @@ const CardBack = styled.div`
   height: 100%;
   backface-visibility: hidden;
   transform: rotateY(180deg);
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--card-bg);
+  border-radius: var(--radius);
   overflow-y: auto;
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 3px;
-  }
+  text-align: left;
 `;
 
 const CardImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  border-radius: var(--radius);
 `;
 
 const CardGlow = styled.div`
@@ -589,11 +463,12 @@ const CardGlow = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.15) 0%,
-    rgba(255, 255, 255, 0) 50%,
-    rgba(255, 255, 255, 0) 100%
+  border-radius: var(--radius);
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(155, 89, 182, 0.3) 0%,
+    rgba(142, 68, 173, 0.1) 40%,
+    transparent 70%
   );
   pointer-events: none;
 `;
@@ -607,56 +482,47 @@ const FlipHint = styled.div`
   color: var(--text-secondary);
   font-size: 0.9rem;
   opacity: 0.8;
-  pointer-events: none;
 `;
 
 const CardTitle = styled.h3`
   font-size: 1.5rem;
+  margin-bottom: 0.5rem;
   color: var(--primary);
   font-family: var(--font-heading);
-  text-align: center;
-  margin-bottom: 0.5rem;
 `;
 
 const CardNumber = styled.div`
-  font-size: 1rem;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
   color: var(--text-secondary);
-  text-align: center;
-  margin-bottom: 0.5rem;
 `;
 
 const CardKeywords = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
 `;
 
 const Keyword = styled.span`
   font-size: 0.8rem;
-  padding: 0.2rem 0.6rem;
-  background: rgba(138, 43, 226, 0.1);
-  border-radius: var(--radius-full);
-  color: var(--secondary);
+  background: rgba(155, 89, 182, 0.1);
+  color: var(--primary);
+  padding: 0.3rem 0.6rem;
+  border-radius: 30px;
 `;
 
 const CardText = styled.p`
   font-size: 0.9rem;
-  line-height: 1.6;
+  margin-bottom: 1rem;
+  line-height: 1.5;
   color: var(--text);
-  margin-bottom: 0.5rem;
-  
-  strong {
-    color: var(--text-primary);
-  }
 `;
 
 const InfoSection = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: 2rem;
-  width: 100%;
   
   @media (min-width: 992px) {
     grid-template-columns: 1fr 1fr;
@@ -665,9 +531,6 @@ const InfoSection = styled.div`
 
 const TodayInfo = styled.div`
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
   
   @media (max-width: 768px) {
     padding: 1.5rem;
@@ -676,52 +539,51 @@ const TodayInfo = styled.div`
 
 const SectionTitle = styled.h2`
   font-size: 1.4rem;
+  margin-bottom: 1.5rem;
   color: var(--text);
   font-family: var(--font-heading);
-  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   
-  @media (max-width: 768px) {
-    font-size: 1.3rem;
+  .material-symbols-rounded {
+    color: var(--primary);
   }
 `;
 
 const CardName = styled.h3`
   font-size: 2rem;
+  margin-bottom: 0.2rem;
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
   font-family: var(--font-heading);
-  
-  @media (max-width: 768px) {
-    font-size: 1.8rem;
-  }
 `;
 
 const CardType = styled.div`
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-secondary);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 `;
 
 const CardDescription = styled.p`
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.6;
   color: var(--text);
+  margin-bottom: 1.5rem;
 `;
 
 const CardMessage = styled.div`
-  margin-top: 1rem;
-  background: rgba(138, 43, 226, 0.05);
-  padding: 1.5rem;
-  border-radius: var(--radius);
+  background: rgba(155, 89, 182, 0.05);
   border-left: 3px solid var(--primary);
+  padding: 1.2rem;
+  border-radius: 0 var(--radius) var(--radius) 0;
 `;
 
 const MessageTitle = styled.h4`
   font-size: 1.1rem;
-  color: var(--primary);
   margin-bottom: 0.8rem;
+  color: var(--primary);
   font-family: var(--font-heading);
 `;
 
@@ -733,9 +595,6 @@ const Message = styled.p`
 
 const ReflectionSection = styled.div`
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
   
   @media (max-width: 768px) {
     padding: 1.5rem;
@@ -746,6 +605,7 @@ const ReflectionPrompt = styled.p`
   font-size: 1rem;
   line-height: 1.6;
   color: var(--text-secondary);
+  margin-bottom: 1.5rem;
 `;
 
 const ReflectionInput = styled.textarea`
@@ -755,14 +615,16 @@ const ReflectionInput = styled.textarea`
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text);
+  font-family: inherit;
   font-size: 1rem;
-  resize: none;
-  transition: border-color 0.3s ease;
+  resize: vertical;
+  min-height: 120px;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.3s;
   
   &:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
   }
 `;
 
@@ -771,36 +633,34 @@ const SaveButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.8rem 1.5rem;
   background: var(--gradient-primary);
+  color: white;
+  padding: 0.8rem 1.5rem;
   border: none;
   border-radius: var(--radius-full);
-  color: white;
+  font-family: inherit;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  align-self: flex-end;
+  transition: all 0.3s;
   
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
   }
   
   .spinner {
     display: inline-block;
-    width: 1rem;
-    height: 1rem;
+    width: 16px;
+    height: 16px;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: white;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
   }
   
   @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
   }
 `;
 
@@ -808,33 +668,8 @@ const SuccessMessage = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--success);
-  font-size: 0.9rem;
-  
-  .material-symbols-rounded {
-    font-size: 1.2rem;
-  }
-`;
-
-const ShareCardButton = styled(motion.button)`
-  margin: 2rem auto 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 1.5rem;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  color: var(--text);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: var(--card-bg-hover);
-    color: var(--primary);
-  }
+  margin-top: 1rem;
+  color: #4CAF50;
   
   .material-symbols-rounded {
     font-size: 1.2rem;

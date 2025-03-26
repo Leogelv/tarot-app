@@ -27,6 +27,7 @@ const CardDetails = () => {
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [showAnimatedCard, setShowAnimatedCard] = useState(true);
 
   useEffect(() => {
     const fetchCardDetails = async () => {
@@ -43,6 +44,11 @@ const CardDetails = () => {
     };
 
     fetchCardDetails();
+    
+    // Настройка анимированного появления карты
+    setTimeout(() => {
+      setShowAnimatedCard(false);
+    }, 1000);
   }, [cardId]);
 
   useEffect(() => {
@@ -79,21 +85,38 @@ const CardDetails = () => {
       ) : card && (
         <ContentContainer>
           <CardSection>
-            <CardImageContainer
-              as={motion.div}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <CardImage 
-                src={card.image_url} 
-                alt={card.name}
-                as={motion.img}
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.3 }}
-              />
-              <CardGlow />
-            </CardImageContainer>
+            <AnimatePresence>
+              {showAnimatedCard ? (
+                <CardImageContainer
+                  key="animated-card"
+                  layoutId={`card-${cardId}`}
+                >
+                  <CardImage 
+                    src={card.image_url} 
+                    alt={card.name}
+                    layoutId={`card-image-${cardId}`}
+                  />
+                  <CardGlow layoutId={`card-glow-${cardId}`} />
+                </CardImageContainer>
+              ) : (
+                <CardImageContainer
+                  key="static-card"
+                  as={motion.div}
+                  initial={{ scale: 1, opacity: 1 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                >
+                  <CardImage 
+                    src={card.image_url} 
+                    alt={card.name}
+                    as={motion.img}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                  <CardGlow />
+                </CardImageContainer>
+              )}
+            </AnimatePresence>
 
             <CardInfo
               as={motion.div}
@@ -101,7 +124,11 @@ const CardDetails = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              <CardTitle>{card.name}</CardTitle>
+              <CardTitle 
+                layoutId={showAnimatedCard ? `card-name-${cardId}` : undefined}
+              >
+                {card.name}
+              </CardTitle>
               <CardSubtitle>
                 {card.type === 'major' ? 'Старший Аркан' : card.suit} • {card.number}
               </CardSubtitle>
@@ -296,7 +323,7 @@ const CardSection = styled.div`
   }
 `;
 
-const CardImageContainer = styled.div`
+const CardImageContainer = styled(motion.div)`
   position: relative;
   border-radius: var(--radius);
   overflow: hidden;
@@ -310,22 +337,22 @@ const CardImageContainer = styled.div`
   }
 `;
 
-const CardImage = styled.img`
+const CardImage = styled(motion.img)`
   width: 100%;
   height: 100%;
   object-fit: cover;
 `;
 
-const CardGlow = styled.div`
+const CardGlow = styled(motion.div)`
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: radial-gradient(circle at 50% 50%, 
-    rgba(155, 89, 182, 0.1) 0%,
-    rgba(155, 89, 182, 0.05) 50%,
-    transparent 100%
+    rgba(155, 89, 182, 0.3) 0%,
+    rgba(155, 89, 182, 0.1) 40%,
+    transparent 70%
   );
   pointer-events: none;
 `;
@@ -336,7 +363,7 @@ const CardInfo = styled.div`
   gap: 1.5rem;
 `;
 
-const CardTitle = styled.h1`
+const CardTitle = styled(motion.h1)`
   font-size: 2.5rem;
   background: var(--gradient-primary);
   -webkit-background-clip: text;

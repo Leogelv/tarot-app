@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { login, setError } from '../store/slices/authSlice';
+import { registerUser, clearAuthError } from '../store/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Register = () => {
@@ -29,7 +29,7 @@ const Register = () => {
   
   useEffect(() => {
     // Clear any previous errors when component mounts
-    dispatch(setError(null));
+    dispatch(clearAuthError());
   }, [dispatch]);
   
   const handleChange = (e) => {
@@ -41,7 +41,7 @@ const Register = () => {
     
     // Очищаем ошибки при изменении данных формы
     if (error) {
-      dispatch(setError(null));
+      dispatch(clearAuthError());
     }
   };
   
@@ -49,17 +49,18 @@ const Register = () => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
-      dispatch(setError('Пароли не совпадают'));
+      console.error('Пароли не совпадают');
       return;
     }
     
     try {
-      // Симулируем успешную регистрацию
-      dispatch(
-        login({
-          id: "new-user-id", 
-          email: formData.email, 
-          name: formData.name
+      await dispatch(
+        registerUser({
+          email: formData.email,
+          password: formData.password,
+          userData: {
+            name: formData.name
+          }
         })
       );
       
@@ -73,7 +74,6 @@ const Register = () => {
       }, 2000);
     } catch (err) {
       console.error('Ошибка регистрации:', err);
-      dispatch(setError('Ошибка при регистрации. Пожалуйста, попробуйте позже.'));
     }
   };
   

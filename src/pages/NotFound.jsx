@@ -1,103 +1,167 @@
 import React from 'react';
-import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import styled from 'styled-components';
 
 const NotFound = () => {
   return (
-    <PageContainer className="page-container">
-      <ContentContainer>
-        <ErrorCode
-          as={motion.h1}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          404
-        </ErrorCode>
-        <ErrorMessage
-          as={motion.p}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          Страница не найдена
-        </ErrorMessage>
-        <ErrorDescription
-          as={motion.p}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
-          Карты указывают, что вы свернули не на тот путь.
-        </ErrorDescription>
-        <BackButton
-          as={motion.button}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <Link to="/">Вернуться на главную</Link>
-        </BackButton>
-      </ContentContainer>
-    </PageContainer>
+    <NotFoundContainer>
+      <ContentWrapper>
+        <ErrorCode>404</ErrorCode>
+        <TarotCard>
+          <CardFront />
+          <CardBack />
+        </TarotCard>
+        <Title>Page Not Found</Title>
+        <Description>
+          The cards couldn't reveal the page you're looking for. It may have been moved, 
+          deleted, or perhaps never existed in this realm.
+        </Description>
+        <HomeButton as={Link} to="/">
+          Return to Homepage
+        </HomeButton>
+      </ContentWrapper>
+    </NotFoundContainer>
   );
 };
 
-// Styled Components
-const PageContainer = styled.div`
-  min-height: 80vh;
+const NotFoundContainer = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 80vh;
   padding: 2rem;
+  background: radial-gradient(circle, rgba(67, 67, 157, 0.05) 0%, rgba(35, 26, 81, 0.1) 100%);
 `;
 
-const ContentContainer = styled.div`
+const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  max-width: 500px;
+  max-width: 600px;
 `;
 
 const ErrorCode = styled.h1`
   font-size: 8rem;
   font-weight: bold;
-  background: var(--gradient-primary);
+  margin: 0;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 1rem;
   line-height: 1;
-`;
-
-const ErrorMessage = styled.p`
-  font-size: 2rem;
-  color: var(--text);
-  margin-bottom: 1rem;
-  font-weight: 500;
-`;
-
-const ErrorDescription = styled.p`
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
-`;
-
-const BackButton = styled.button`
-  padding: 1rem 2rem;
-  background: var(--gradient-primary);
-  border: none;
-  border-radius: var(--radius-full);
-  cursor: pointer;
   
-  a {
-    color: white;
-    text-decoration: none;
-    font-weight: 500;
+  @media (max-width: 768px) {
+    font-size: 6rem;
+  }
+`;
+
+const TarotCard = styled.div`
+  position: relative;
+  width: 180px;
+  height: 320px;
+  margin: 2rem 0;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  animation: float 6s ease-in-out infinite;
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-20px) rotate(2deg);
+    }
+    100% {
+      transform: translateY(0px) rotate(0deg);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    width: 140px;
+    height: 250px;
+  }
+`;
+
+const CardFront = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transform: rotateY(180deg);
+  
+  &:after {
+    content: "?";
+    font-size: 5rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+`;
+
+const CardBack = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  backface-visibility: hidden;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-primary-light),
+    var(--color-primary-light) 10px,
+    var(--color-primary) 10px,
+    var(--color-primary) 20px
+  );
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  
+  &:before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+  }
+`;
+
+const Title = styled.h2`
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  margin: 1rem 0;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+`;
+
+const Description = styled.p`
+  font-size: 1.2rem;
+  color: var(--color-text);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+`;
+
+const HomeButton = styled.button`
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  
+  &:hover {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   }
 `;
 

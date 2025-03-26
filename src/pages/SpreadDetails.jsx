@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
-import SpreadVisualizer from '../components/effects/SpreadVisualizer';
+import { motion } from 'framer-motion';
 
 // Моковые данные раскладов
 const mockSpreads = [
@@ -124,9 +123,9 @@ const SpreadDetails = () => {
   const [spread, setSpread] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showStartButton, setShowStartButton] = useState(false);
-  const [startAnimation, setStartAnimation] = useState(false);
-  const detailsRef = useRef(null);
+  const [isReading, setIsReading] = useState(false);
+  const [readingCards, setReadingCards] = useState([]);
+  const readingSectionRef = React.useRef(null);
   
   useEffect(() => {
     // Имитация загрузки данных расклада
@@ -142,8 +141,6 @@ const SpreadDetails = () => {
         
         if (foundSpread) {
           setSpread(foundSpread);
-          // Показываем кнопку старта после небольшой задержки для эффекта
-          setTimeout(() => setShowStartButton(true), 1200);
         } else {
           setError('Расклад не найден');
         }
@@ -159,15 +156,23 @@ const SpreadDetails = () => {
   }, [spreadId]);
   
   const handleStartReading = () => {
-    // Запускаем анимацию и прокручиваем к информации о раскладе
-    setStartAnimation(true);
+    // Показываем подготовленный расклад вместо сообщения
+    const mockCards = Array(spread.cards_count).fill(null).map((_, i) => ({
+      id: i + 1,
+      position: spread.positions[i]?.name || `Позиция ${i+1}`,
+      cardName: ['Король Мечей', 'Десятка Пентаклей', 'Маг', 'Императрица', 'Шут', 'Колесо Фортуны', 'Сила', 'Звезда', 'Луна', 'Мир'][i % 10],
+      imageUrl: `https://i.ibb.co/DfVGGzg/card${(i % 10) + 1}.jpg`,
+      meaning: `Значение для позиции ${spread.positions[i]?.name || i+1}`
+    }));
     
+    // Отображаем интерактивный расклад
+    setIsReading(true);
+    setReadingCards(mockCards);
+    
+    // Прокручиваем экран к расладу
     setTimeout(() => {
-      detailsRef.current?.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }, 200);
+      readingSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
   };
   
   return (
@@ -219,182 +224,123 @@ const SpreadDetails = () => {
             </DifficultyBadge>
           </SpreadHeader>
           
-          <HeroSection>
-            <SpreadHeroContent
-              as={motion.div}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <SpreadTitle>{spread.name}</SpreadTitle>
-              <SpreadSubtitle>{spread.description}</SpreadSubtitle>
-              
-              <SpreadInfo>
-                <InfoItem>
-                  <span className="material-symbols-rounded">style</span>
-                  {spread.cards_count} карт
-                </InfoItem>
-                <InfoItem>
-                  <span className="material-symbols-rounded">
-                    {spread.difficulty === 'easy' ? 'signal_cellular_1_bar' : 
-                     spread.difficulty === 'medium' ? 'signal_cellular_2_bar' : 
-                     'signal_cellular_4_bar'}
-                  </span>
-                  {spread.difficulty === 'easy' ? 'Простой' : 
-                   spread.difficulty === 'medium' ? 'Средний' : 
-                   'Сложный'}
-                </InfoItem>
-              </SpreadInfo>
-              
-              <AnimatePresence>
-                {showStartButton && (
-                  <StartButton
-                    as={motion.button}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    whileHover={{ 
-                      scale: 1.05,
-                      boxShadow: "0 10px 25px rgba(138, 43, 226, 0.4)"
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleStartReading}
-                  >
-                    <span className="material-symbols-rounded">auto_awesome</span>
-                    Начать расклад
-                  </StartButton>
-                )}
-              </AnimatePresence>
-            </SpreadHeroContent>
-            
-            <SpreadVisualizerContainer
-              as={motion.div}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ 
-                opacity: 1,
-                scale: 1,
-                transition: { delay: 0.3, duration: 0.7 }
-              }}
-            >
-              <SpreadVisualizer 
-                spreadName={spread.name}
-                difficulty={spread.difficulty}
-                cards_count={spread.cards_count}
-              />
-            </SpreadVisualizerContainer>
-          </HeroSection>
-          
-          <SpreadDetailsSection 
-            ref={detailsRef}
-            as={motion.div}
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ 
-              opacity: startAnimation ? 1 : 0,
-              y: startAnimation ? 0 : 50,
-              transition: { duration: 0.8 }
-            }}
-          >
-            <SectionTitle>Как выполнить расклад</SectionTitle>
-            
-            <DetailBlocks>
-              <DetailBlock className="glass-card">
-                <DetailBlockTitle>
-                  <span className="material-symbols-rounded">help</span>
-                  Ваш вопрос
-                </DetailBlockTitle>
-                <DetailBlockContent>
-                  <p>Прежде чем начать расклад, сформулируйте ваш вопрос. Он должен быть конкретным, но открытым. Например, вместо "Найду ли я работу?" лучше спросить "Какие энергии влияют на мой поиск работы?"</p>
-                  
-                  <QuestionInput
-                    placeholder="Введите ваш вопрос здесь..."
-                    rows={2}
-                  />
-                </DetailBlockContent>
-              </DetailBlock>
-              
-              <DetailBlock className="glass-card">
-                <DetailBlockTitle>
-                  <span className="material-symbols-rounded">view_carousel</span>
-                  Позиции карт
-                </DetailBlockTitle>
-                <DetailBlockContent>
-                  <p>Расклад "{spread.name}" состоит из {spread.cards_count} карт, расположенных особым образом:</p>
-                  
-                  <PositionsList>
-                    {spread.positions.map((position, index) => (
-                      <PositionItem 
-                        key={index}
-                        as={motion.div}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ 
-                          opacity: startAnimation ? 1 : 0,
-                          y: startAnimation ? 0 : 20,
-                          transition: { delay: 0.2 + index * 0.1, duration: 0.5 }
-                        }}
-                      >
-                        <PositionNumber>{index + 1}</PositionNumber>
-                        <PositionDetails>
-                          <PositionName>{position.name}</PositionName>
-                          <PositionDescription>{position.description}</PositionDescription>
-                        </PositionDetails>
-                      </PositionItem>
-                    ))}
-                  </PositionsList>
-                </DetailBlockContent>
-              </DetailBlock>
-              
-              <DetailBlock className="glass-card">
-                <DetailBlockTitle>
-                  <span className="material-symbols-rounded">format_list_numbered</span>
-                  Инструкция
-                </DetailBlockTitle>
-                <DetailBlockContent>
-                  <InstructionSteps>
-                    {spread.instructions.map((instruction, index) => (
-                      <InstructionStep 
-                        key={index}
-                        as={motion.div}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ 
-                          opacity: startAnimation ? 1 : 0,
-                          x: startAnimation ? 0 : -20,
-                          transition: { delay: 0.3 + index * 0.1, duration: 0.5 }
-                        }}
-                      >
-                        <StepNumber>{index + 1}</StepNumber>
-                        <StepText>{instruction}</StepText>
-                      </InstructionStep>
-                    ))}
-                  </InstructionSteps>
-                </DetailBlockContent>
-              </DetailBlock>
-            </DetailBlocks>
-            
-            <ActionButtons>
-              <SecondaryButton
-                as={motion.button}
-                whileHover={{ y: -3 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => alert("Функция недоступна в демо версии")}
-              >
-                <span className="material-symbols-rounded">favorite</span>
-                Добавить в избранное
-              </SecondaryButton>
-              
-              <PrimaryButton
-                as={motion.button}
-                whileHover={{ 
-                  y: -3, 
-                  boxShadow: "0 10px 25px rgba(138, 43, 226, 0.4)"
+          <SpreadContent>
+            <SpreadImageSection>
+              <SpreadImage 
+                src={spread.image_url} 
+                alt={spread.name}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = 'https://i.ibb.co/DpKmR8b/three-card-spread.jpg';
                 }}
+              />
+              <CardCount>
+                <span className="material-symbols-rounded">style</span>
+                {spread.cards_count} карт
+              </CardCount>
+            </SpreadImageSection>
+            
+            <SpreadInfoSection>
+              <SpreadName>{spread.name}</SpreadName>
+              <SpreadDescription>{spread.description}</SpreadDescription>
+              
+              <StartReadingButton 
+                onClick={handleStartReading}
+                as={motion.button}
+                whileHover={{ y: -3, boxShadow: '0 10px 15px rgba(155, 89, 217, 0.3)' }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => alert("Функция недоступна в демо версии")}
               >
-                <span className="material-symbols-rounded">draw</span>
-                Начать чтение
-              </PrimaryButton>
-            </ActionButtons>
+                <span className="material-symbols-rounded">playing_cards</span>
+                Начать расклад
+              </StartReadingButton>
+            </SpreadInfoSection>
+          </SpreadContent>
+          
+          {isReading && (
+            <ReadingSection
+              ref={readingSectionRef}
+              as={motion.div}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="glass-card"
+            >
+              <SectionTitle>Ваш расклад</SectionTitle>
+              <ReadingGrid $cardCount={spread.cards_count}>
+                {readingCards.map((card, index) => (
+                  <CardItem
+                    key={index}
+                    as={motion.div}
+                    initial={{ opacity: 0, rotateY: 180 }}
+                    animate={{ opacity: 1, rotateY: 0 }}
+                    transition={{ delay: index * 0.2, duration: 0.7 }}
+                  >
+                    <CardFront>
+                      <CardImage src={card.imageUrl} alt={card.cardName} />
+                      <CardName>{card.cardName}</CardName>
+                      <PositionLabel>{card.position}</PositionLabel>
+                    </CardFront>
+                  </CardItem>
+                ))}
+              </ReadingGrid>
+              <ReadingNote>
+                В полной версии приложения вы получите подробную интерпретацию каждой карты и расклада в целом.
+              </ReadingNote>
+            </ReadingSection>
+          )}
+          
+          <SpreadDetailsSection className="glass-card">
+            <SectionTitle>Позиции карт</SectionTitle>
+            <PositionsList>
+              {spread.positions.map((position, index) => (
+                <PositionItem 
+                  key={index}
+                  as={motion.div}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <PositionNumber>{index + 1}</PositionNumber>
+                  <PositionContent>
+                    <PositionName>{position.name}</PositionName>
+                    <PositionDescription>{position.description}</PositionDescription>
+                  </PositionContent>
+                </PositionItem>
+              ))}
+            </PositionsList>
           </SpreadDetailsSection>
+          
+          <InstructionsSection className="glass-card">
+            <SectionTitle>Инструкция по раскладу</SectionTitle>
+            <InstructionSteps>
+              {spread.instructions.map((instruction, index) => (
+                <InstructionStep 
+                  key={index}
+                  as={motion.div}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <StepNumber>{index + 1}</StepNumber>
+                  <StepText>{instruction}</StepText>
+                </InstructionStep>
+              ))}
+            </InstructionSteps>
+          </InstructionsSection>
+          
+          {!isReading && (
+            <ButtonContainer>
+              <StartReadingButton 
+                onClick={handleStartReading}
+                as={motion.button}
+                whileHover={{ y: -3, boxShadow: '0 10px 15px rgba(155, 89, 217, 0.3)' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="material-symbols-rounded">playing_cards</span>
+                Начать расклад
+              </StartReadingButton>
+            </ButtonContainer>
+          )}
         </ContentContainer>
       )}
     </PageContainer>
@@ -403,10 +349,14 @@ const SpreadDetails = () => {
 
 // Styled Components
 const PageContainer = styled.div`
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 1rem;
   position: relative;
+  
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
 `;
 
 const BlobBackground = styled.div`
@@ -436,28 +386,79 @@ const Blob = styled.div`
   }
   
   &.blob-2 {
-    bottom: 20%;
+    bottom: 30%;
     right: 15%;
     width: 250px;
     height: 250px;
     background: var(--secondary);
-    animation: blob-float 18s ease-in-out infinite alternate;
+    animation: blob-float 15s ease-in-out infinite alternate;
+    animation-delay: -2s;
   }
   
   &.blob-3 {
-    top: 50%;
+    top: 60%;
     left: 40%;
     width: 200px;
     height: 200px;
     background: var(--tertiary);
-    animation: blob-float 20s ease-in-out infinite alternate;
+    animation: blob-float 15s ease-in-out infinite alternate;
+    animation-delay: -4s;
+  }
+`;
+
+const LoadingContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 1.5rem;
+  
+  p {
+    color: var(--text-secondary);
+  }
+`;
+
+const ErrorMessage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: rgba(255, 76, 76, 0.1);
+  border: 1px solid rgba(255, 76, 76, 0.3);
+  border-radius: var(--radius);
+  color: #ff4c4c;
+  margin: 2rem auto;
+  max-width: 500px;
+  text-align: center;
+  
+  .material-symbols-rounded {
+    font-size: 2rem;
+  }
+`;
+
+const BackButton = styled.button`
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--card-bg-hover);
+    color: var(--primary);
   }
 `;
 
 const ContentContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 2rem;
 `;
 
 const SpreadHeader = styled.div`
@@ -473,261 +474,152 @@ const BackLink = styled.div`
   gap: 0.5rem;
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 1rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    color: var(--primary);
+  }
   
   .material-symbols-rounded {
     font-size: 1.2rem;
   }
-  
-  &:hover {
-    color: var(--primary);
-  }
 `;
 
 const DifficultyBadge = styled.div`
-  display: flex;
-  align-items: center;
   padding: 0.5rem 1rem;
   border-radius: var(--radius-full);
   font-size: 0.9rem;
   font-weight: 500;
-  
-  ${props => props.$difficulty === 'easy' && `
-    background-color: rgba(72, 187, 120, 0.1);
-    color: #48bb78;
-    border: 1px solid rgba(72, 187, 120, 0.2);
-  `}
-  
-  ${props => props.$difficulty === 'medium' && `
-    background-color: rgba(237, 137, 54, 0.1);
-    color: #ed8936;
-    border: 1px solid rgba(237, 137, 54, 0.2);
-  `}
-  
-  ${props => props.$difficulty === 'advanced' && `
-    background-color: rgba(226, 62, 87, 0.1);
-    color: #e23e57;
-    border: 1px solid rgba(226, 62, 87, 0.2);
-  `}
+  background: ${props => {
+    if (props.$difficulty === 'easy') return 'rgba(46, 213, 115, 0.1)';
+    if (props.$difficulty === 'medium') return 'rgba(255, 193, 7, 0.1)';
+    if (props.$difficulty === 'advanced') return 'rgba(255, 71, 87, 0.1)';
+    return 'rgba(155, 89, 217, 0.1)';
+  }};
+  color: ${props => {
+    if (props.$difficulty === 'easy') return '#2ed573';
+    if (props.$difficulty === 'medium') return '#ffc107';
+    if (props.$difficulty === 'advanced') return '#ff4757';
+    return 'var(--primary)';
+  }};
+  border: 1px solid ${props => {
+    if (props.$difficulty === 'easy') return 'rgba(46, 213, 115, 0.3)';
+    if (props.$difficulty === 'medium') return 'rgba(255, 193, 7, 0.3)';
+    if (props.$difficulty === 'advanced') return 'rgba(255, 71, 87, 0.3)';
+    return 'rgba(155, 89, 217, 0.3)';
+  }};
 `;
 
-const LoadingContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  gap: 1rem;
-  
-  p {
-    color: var(--text-secondary);
-  }
-`;
-
-const ErrorMessage = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  text-align: center;
-  background: var(--error-bg);
-  padding: 2rem;
-  border-radius: var(--radius);
-  color: var(--error);
-  margin: 3rem auto;
-  max-width: 500px;
-  
-  .material-symbols-rounded {
-    font-size: 3rem;
-  }
-`;
-
-const BackButton = styled.button`
-  margin-top: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.7rem 1.5rem;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  color: var(--text);
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: var(--card-bg-hover);
-    color: var(--primary);
-  }
-`;
-
-const HeroSection = styled.div`
+const SpreadContent = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  align-items: center;
   
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
 
-const SpreadHeroContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+const SpreadImageSection = styled.div`
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
 `;
 
-const SpreadTitle = styled.h1`
-  font-size: 2.5rem;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-family: var(--font-heading);
+const SpreadImage = styled.img`
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: var(--radius);
   
   @media (max-width: 768px) {
-    font-size: 2rem;
+    height: 200px;
   }
 `;
 
-const SpreadSubtitle = styled.p`
-  font-size: 1.2rem;
-  line-height: 1.7;
-  color: var(--text);
-  
-  @media (max-width: 768px) {
-    font-size: 1.1rem;
-  }
-`;
-
-const SpreadInfo = styled.div`
-  display: flex;
-  gap: 1.5rem;
-`;
-
-const InfoItem = styled.div`
+const CardCount = styled.div`
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text-secondary);
-  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
   
   .material-symbols-rounded {
-    color: var(--primary);
     font-size: 1.2rem;
   }
 `;
 
-const StartButton = styled.button`
+const SpreadInfoSection = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const SpreadName = styled.h1`
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(to right, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+`;
+
+const SpreadDescription = styled.p`
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: var(--text);
+  flex: 1;
+`;
+
+const StartReadingButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem 2rem;
-  background: var(--gradient-primary);
+  gap: 0.7rem;
+  padding: 1rem 1.5rem;
+  background: var(--primary);
+  color: white;
   border: none;
   border-radius: var(--radius-full);
-  color: white;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 5px 20px rgba(138, 43, 226, 0.25);
-  align-self: flex-start;
-  margin-top: 1rem;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: var(--primary-light);
+    transform: translateY(-3px);
+  }
   
   .material-symbols-rounded {
     font-size: 1.3rem;
   }
 `;
 
-const SpreadVisualizerContainer = styled.div`
-  width: 100%;
-  height: 400px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  
-  @media (max-width: 768px) {
-    height: 350px;
-  }
-`;
-
 const SpreadDetailsSection = styled.div`
-  margin-top: 2rem;
+  padding: 2rem;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.8rem;
-  color: var(--text);
-  font-family: var(--font-heading);
-  margin-bottom: 2rem;
-  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
   
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-  }
-`;
-
-const DetailBlocks = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-`;
-
-const DetailBlock = styled.div`
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-  }
-`;
-
-const DetailBlockTitle = styled.h3`
-  font-size: 1.3rem;
-  color: var(--primary);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-heading);
-  
-  .material-symbols-rounded {
-    font-size: 1.4rem;
-  }
-`;
-
-const DetailBlockContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  
-  p {
-    font-size: 1.05rem;
-    line-height: 1.7;
-    color: var(--text);
-  }
-`;
-
-const QuestionInput = styled.textarea`
-  width: 100%;
-  padding: 1rem;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font-size: 1rem;
-  resize: none;
-  transition: border-color 0.3s ease;
-  
-  &:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--radius);
   }
 `;
 
@@ -740,15 +632,21 @@ const PositionsList = styled.div`
 const PositionItem = styled.div`
   display: flex;
   gap: 1rem;
-  align-items: flex-start;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
+  
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
 `;
 
 const PositionNumber = styled.div`
-  width: 30px;
-  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36px;
+  height: 36px;
   background: var(--primary);
   color: white;
   border-radius: 50%;
@@ -756,22 +654,24 @@ const PositionNumber = styled.div`
   flex-shrink: 0;
 `;
 
-const PositionDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+const PositionContent = styled.div`
+  flex: 1;
 `;
 
-const PositionName = styled.h4`
-  font-size: 1.1rem;
-  color: var(--text);
-  font-weight: 600;
+const PositionName = styled.h3`
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--primary-light);
 `;
 
 const PositionDescription = styled.p`
-  font-size: 0.95rem;
-  color: var(--text-secondary);
+  font-size: 1rem;
   line-height: 1.6;
+  color: var(--text);
+`;
+
+const InstructionsSection = styled.div`
+  padding: 2rem;
 `;
 
 const InstructionSteps = styled.div`
@@ -783,80 +683,111 @@ const InstructionSteps = styled.div`
 const InstructionStep = styled.div`
   display: flex;
   gap: 1rem;
-  align-items: flex-start;
 `;
 
 const StepNumber = styled.div`
-  width: 25px;
-  height: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 30px;
+  height: 30px;
   background: var(--primary);
   color: white;
   border-radius: 50%;
-  font-size: 0.9rem;
   font-weight: 600;
+  font-size: 0.9rem;
   flex-shrink: 0;
 `;
 
 const StepText = styled.p`
   font-size: 1rem;
-  color: var(--text);
   line-height: 1.6;
-`;
-
-const ActionButtons = styled.div`
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-top: 3rem;
-  flex-wrap: wrap;
-`;
-
-const PrimaryButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 2rem;
-  background: var(--gradient-primary);
-  border: none;
-  border-radius: var(--radius-full);
-  color: white;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 5px 15px rgba(138, 43, 226, 0.25);
-  
-  .material-symbols-rounded {
-    font-size: 1.2rem;
-  }
-`;
-
-const SecondaryButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 2rem;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
   color: var(--text);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-bottom: 3rem;
+`;
+
+const ReadingSection = styled.div`
+  padding: 2rem;
+  margin: 2rem 0;
   
-  &:hover {
-    background: var(--card-bg-hover);
-    color: var(--primary);
-    border-color: var(--primary);
+  @media (max-width: 768px) {
+    padding: 1rem;
   }
+`;
+
+const ReadingGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
   
-  .material-symbols-rounded {
-    font-size: 1.2rem;
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
   }
+`;
+
+const CardItem = styled.div`
+  perspective: 1000px;
+  height: 240px;
+  
+  @media (max-width: 768px) {
+    height: 180px;
+  }
+`;
+
+const CardFront = styled.div`
+  position: relative;
+  height: 100%;
+  width: 100%;
+  border-radius: var(--radius);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+`;
+
+const CardImage = styled.img`
+  width: 100%;
+  height: 70%;
+  object-fit: cover;
+  border-top-left-radius: var(--radius);
+  border-top-right-radius: var(--radius);
+`;
+
+const CardName = styled.h3`
+  font-size: 0.9rem;
+  margin: 0.5rem 0 0.2rem;
+  text-align: center;
+  color: var(--text);
+  padding: 0 0.5rem;
+`;
+
+const PositionLabel = styled.div`
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 0 0.5rem;
+`;
+
+const ReadingNote = styled.p`
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(155, 89, 217, 0.1);
+  border: 1px solid rgba(155, 89, 217, 0.2);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
 `;
 
 export default SpreadDetails; 

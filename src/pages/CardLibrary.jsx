@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import CardTransition from '../components/effects/CardTransition';
 
 // Моковые данные карт для демонстрации
 const mockCards = [
@@ -48,7 +49,8 @@ const CardLibrary = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [selectedCardId, setSelectedCardId] = useState(null);
+  const [zooming, setZooming] = useState(false);
 
   useEffect(() => {
     const fetchCards = async () => {
@@ -67,11 +69,15 @@ const CardLibrary = () => {
     fetchCards();
   }, []);
 
-  const handleCardClick = (card) => {
-    setSelectedCard(card);
+  const handleCardSelect = (cardId) => {
+    setSelectedCardId(cardId);
+    setZooming(true);
+    
+    // Делаем небольшую задержку для анимации
     setTimeout(() => {
-      navigate(`/cards/${card.id}`);
-    }, 300);
+      // Для демо все карты ведут на одну страницу с ID 7 (Колесница)
+      navigate(`/cards/7`);
+    }, 1000);
   };
 
   const filteredCards = cards.filter(card => {
@@ -79,6 +85,53 @@ const CardLibrary = () => {
     const matchesSearch = card.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  // Анимация для карточек
+  const cardVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: (i) => ({
+      opacity: 1,
+      scale: 1,
+      transition: {
+        delay: i * 0.05,
+        duration: 0.3,
+      }
+    }),
+    selected: {
+      zIndex: 10,
+      transition: {
+        duration: 0.3
+      }
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        duration: 0.2
+      }
+    }
+  };
+
+  // Если выполняется зум (анимация перехода), показываем только выбранную карту
+  if (zooming && selectedCardId !== null) {
+    const selectedCard = cards.find(card => card.id === selectedCardId);
+    
+    return (
+      <ZoomContainer
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        <ZoomCardWrapper
+          initial={{ scale: 0.5 }}
+          animate={{ scale: 1.5 }}
+          exit={{ scale: 2, opacity: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <CardTransition cardImageUrl={selectedCard.image_url} isActive={true} />
+        </ZoomCardWrapper>
+      </ZoomContainer>
+    );
+  }
 
   return (
     <LibraryContainer className="page-container">
@@ -132,43 +185,42 @@ const CardLibrary = () => {
       
       {!loading && filteredCards.length === 0 && (
         <NoResultsMessage>
-          Карты не найдены. Попробуйте изменить параметры поиска.
+          <span className="material-symbols-rounded">search_off</span>
+          <p>Карты не найдены. Попробуйте изменить параметры поиска.</p>
         </NoResultsMessage>
       )}
       
       <CardsGrid>
         <AnimatePresence>
-          {filteredCards.map((card) => (
+          {filteredCards.map((card, index) => (
             <CardItem
               key={card.id}
-              as={motion.div}
               layoutId={`card-${card.id}`}
-              onClick={() => handleCardClick(card)}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9 }}
+              custom={index}
+              variants={cardVariants}
+              initial="hidden"
+              animate={selectedCardId === card.id ? "selected" : "visible"}
+              exit="exit"
+              onClick={() => handleCardSelect(card.id)}
               whileHover={{ 
-                y: -10,
-                transition: { duration: 0.2 }
+                y: -10, 
+                boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)',
+                transition: { duration: 0.3 }
               }}
             >
-              <CardImageWrapper>
-                <CardImage 
-                  src={card.image_url} 
-                  alt={card.name}
-                  loading="lazy"
-                />
-                <CardGlow />
-              </CardImageWrapper>
-              <CardContent>
-                <CardName>{card.name}</CardName>
-                <CardNumber>{card.number}</CardNumber>
-                <KeywordsList>
-                  {card.keywords.slice(0, 3).map((keyword, index) => (
-                    <Keyword key={index}>{keyword}</Keyword>
-                  ))}
-                </KeywordsList>
-              </CardContent>
+              <CardImageContainer>
+                <Card3DContainer>
+                  <CardTransition cardImageUrl={card.image_url} />
+                </Card3DContainer>
+                <CardGlow layoutId={`card-glow-${card.id}`} />
+              </CardImageContainer>
+              
+              <CardInfo>
+                <CardName layoutId={`card-name-${card.id}`}>{card.name}</CardName>
+                <CardType>
+                  {card.type === 'major' ? 'Старший Аркан' : card.type} • {card.number}
+                </CardType>
+              </CardInfo>
             </CardItem>
           ))}
         </AnimatePresence>
@@ -176,6 +228,40 @@ const CardLibrary = () => {
     </LibraryContainer>
   );
 };
+
+// Новые стили для анимации зума
+const ZoomContainer = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+`;
+
+const ZoomCardWrapper = styled(motion.div)`
+  width: 300px;
+  height: 450px;
+  position: relative;
+  
+  @media (max-width: 768px) {
+    width: 250px;
+    height: 375px;
+  }
+`;
+
+const Card3DContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+`;
 
 const LibraryContainer = styled.div`
   max-width: 1200px;
@@ -339,7 +425,7 @@ const CardItem = styled(motion.div)`
   position: relative;
 `;
 
-const CardImageWrapper = styled.div`
+const CardImageContainer = styled.div`
   position: relative;
   border-radius: var(--radius);
   overflow: hidden;
@@ -368,7 +454,7 @@ const CardGlow = styled.div`
   pointer-events: none;
 `;
 
-const CardContent = styled.div`
+const CardInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -382,24 +468,9 @@ const CardName = styled.h3`
   font-family: var(--font-heading);
 `;
 
-const CardNumber = styled.span`
+const CardType = styled.span`
   font-size: 0.9rem;
   color: var(--text-secondary);
-`;
-
-const KeywordsList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-`;
-
-const Keyword = styled.span`
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  background: var(--card-bg);
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border);
 `;
 
 export default CardLibrary; 

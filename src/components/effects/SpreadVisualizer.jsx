@@ -1,270 +1,289 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useSpring, animated } from '@react-spring/three';
-import { Text } from '@react-three/drei';
+import { Environment, Float, PresentationControls } from '@react-three/drei';
+import { motion } from 'framer-motion';
 import * as THREE from 'three';
+import styled from 'styled-components';
 
-// Различные визуальные стили для разных типов раскладов
-const VISUAL_STYLES = {
-  'easy': {
-    particleCount: 300,
-    baseColor: '#8b78ff',
-    secondaryColor: '#c673e6', 
-    speed: 0.5,
-    pattern: 'circle',
-  },
-  'medium': {
-    particleCount: 500,
-    baseColor: '#6e76e5',
-    secondaryColor: '#c39bd3',
-    speed: 0.7,
-    pattern: 'spiral',
-  },
-  'advanced': {
-    particleCount: 800,
-    baseColor: '#8e44ad',
-    secondaryColor: '#4776e6',
-    speed: 0.9,
-    pattern: 'vortex',
+// Типы визуализаторов для разных раскладов
+const VISUALIZER_TYPES = {
+  1: 'CRYSTAL', // Расклад на три карты
+  2: 'VORTEX',  // Кельтский крест
+  3: 'SPIRAL',  // Расклад на любовь
+  4: 'GRID',    // Расклад на решение
+  5: 'ORBIT'    // Расклад на месяц
+};
+
+// Кристаллический визуализатор
+const CrystalVisualizer = () => {
+  const groupRef = useRef();
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    groupRef.current.rotation.y = time * 0.1;
+    groupRef.current.rotation.z = Math.sin(time * 0.1) * 0.05;
+  });
+
+  return (
+    <group ref={groupRef}>
+      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+        <mesh castShadow receiveShadow>
+          <octahedronGeometry args={[2, 0]} />
+          <meshPhysicalMaterial 
+            color="#8a2be2"
+            transmission={0.8}
+            roughness={0.1}
+            metalness={0.2}
+            clearcoat={1}
+            clearcoatRoughness={0.1}
+            envMapIntensity={1}
+          />
+        </mesh>
+      </Float>
+      <ambientLight intensity={0.5} />
+      <spotLight position={[10, 10, 10]} intensity={1} castShadow />
+    </group>
+  );
+};
+
+// Спиральный визуализатор
+const SpiralVisualizer = () => {
+  const groupRef = useRef();
+  const particlesRef = useRef();
+  const particles = [];
+
+  // Генерируем частицы
+  for (let i = 0; i < 100; i++) {
+    const angle = i * 0.2;
+    const radius = 0.05 + i * 0.01;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius;
+    const z = i * 0.02 - 1;
+    particles.push([x, y, z]);
+  }
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    groupRef.current.rotation.y = time * 0.1;
+    groupRef.current.rotation.z = Math.sin(time * 0.2) * 0.1;
+    
+    if (particlesRef.current) {
+      particles.forEach((particle, i) => {
+        const mesh = particlesRef.current.children[i];
+        mesh.position.z += Math.sin(time + i) * 0.003;
+        mesh.material.color.setHSL((time + i * 0.01) % 1, 0.8, 0.5);
+      });
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <group ref={particlesRef}>
+        {particles.map((pos, i) => (
+          <mesh key={i} position={pos}>
+            <sphereGeometry args={[0.05, 16, 16]} />
+            <meshPhysicalMaterial 
+              emissive="#ffffff"
+              emissiveIntensity={1}
+            />
+          </mesh>
+        ))}
+      </group>
+      <ambientLight intensity={0.2} />
+      <pointLight position={[0, 0, 0]} intensity={2} color="#ffffff" />
+    </group>
+  );
+};
+
+// Вихревой визуализатор
+const VortexVisualizer = () => {
+  const groupRef = useRef();
+  const ringsRef = useRef([]);
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    
+    ringsRef.current.forEach((ring, i) => {
+      if (ring) {
+        ring.rotation.z = time * (0.1 + i * 0.05);
+        ring.rotation.x = Math.sin(time * 0.3) * 0.2;
+        ring.scale.x = ring.scale.y = 1 + Math.sin(time * 0.5 + i) * 0.1;
+      }
+    });
+  });
+
+  return (
+    <group ref={groupRef}>
+      {Array.from({ length: 7 }).map((_, i) => (
+        <mesh 
+          key={i} 
+          position={[0, 0, i * 0.1 - 0.3]}
+          ref={el => (ringsRef.current[i] = el)}
+        >
+          <torusGeometry args={[1 + i * 0.1, 0.02, 16, 100]} />
+          <meshStandardMaterial 
+            color={new THREE.Color().setHSL(i / 7, 0.8, 0.5)} 
+            emissive={new THREE.Color().setHSL(i / 7, 0.8, 0.5)}
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+      ))}
+      <ambientLight intensity={0.3} />
+      <pointLight position={[0, 0, 3]} intensity={1} />
+    </group>
+  );
+};
+
+// Сетчатый визуализатор
+const GridVisualizer = () => {
+  const groupRef = useRef();
+  const gridRef = useRef();
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    groupRef.current.rotation.y = time * 0.1;
+    
+    // Волновой эффект на сетке
+    if (gridRef.current) {
+      const positions = gridRef.current.geometry.attributes.position;
+      const count = positions.count;
+      
+      for (let i = 0; i < count; i++) {
+        const x = positions.getX(i);
+        const y = positions.getY(i);
+        const wave = Math.sin(x * 2 + time) * Math.cos(y * 2 + time) * 0.2;
+        positions.setZ(i, wave);
+      }
+      
+      positions.needsUpdate = true;
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      <mesh ref={gridRef} receiveShadow>
+        <planeGeometry args={[4, 4, 32, 32]} />
+        <meshStandardMaterial 
+          color="#6d52d1"
+          wireframe={true}
+          emissive="#6d52d1"
+          emissiveIntensity={0.2}
+        />
+      </mesh>
+      <ambientLight intensity={0.3} />
+      <spotLight position={[5, 5, 5]} intensity={0.8} castShadow />
+    </group>
+  );
+};
+
+// Орбитальный визуализатор
+const OrbitVisualizer = () => {
+  const groupRef = useRef();
+  const orbitersRef = useRef([]);
+
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    groupRef.current.rotation.y = time * 0.1;
+    
+    orbitersRef.current.forEach((orbiter, i) => {
+      if (orbiter) {
+        const angle = time * (0.2 + i * 0.1);
+        const radius = 1 + i * 0.2;
+        orbiter.position.x = Math.cos(angle) * radius;
+        orbiter.position.z = Math.sin(angle) * radius;
+        orbiter.rotation.y = -angle;
+      }
+    });
+  });
+
+  return (
+    <group ref={groupRef}>
+      <mesh castShadow>
+        <sphereGeometry args={[0.7, 32, 32]} />
+        <meshPhysicalMaterial 
+          color="#8a2be2"
+          metalness={0.9}
+          roughness={0.1}
+          clearcoat={1}
+        />
+      </mesh>
+      
+      {Array.from({ length: 5 }).map((_, i) => (
+        <mesh 
+          key={i} 
+          ref={el => (orbitersRef.current[i] = el)}
+          castShadow
+        >
+          <sphereGeometry args={[0.15, 32, 32]} />
+          <meshStandardMaterial 
+            color={new THREE.Color().setHSL(i / 5, 0.8, 0.5)} 
+            emissive={new THREE.Color().setHSL(i / 5, 0.8, 0.5)}
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+      ))}
+      
+      <ambientLight intensity={0.3} />
+      <spotLight position={[5, 5, 5]} intensity={0.8} castShadow />
+    </group>
+  );
+};
+
+// Выбор визуализатора по типу
+const VisualizerSelector = ({ type }) => {
+  switch(type) {
+    case 'CRYSTAL':
+      return <CrystalVisualizer />;
+    case 'SPIRAL':
+      return <SpiralVisualizer />;
+    case 'VORTEX':
+      return <VortexVisualizer />;
+    case 'GRID':
+      return <GridVisualizer />;
+    case 'ORBIT':
+      return <OrbitVisualizer />;
+    default:
+      return <CrystalVisualizer />;
   }
 };
 
-// Компонент частицы
-const Particle = ({ position, color, index, speed, pattern }) => {
-  const mesh = useRef();
-  const [hovered, setHovered] = useState(false);
-  
-  // Спрингованая анимация при наведении
-  const { scale } = useSpring({
-    scale: hovered ? 1.5 : 1,
-    config: { mass: 1, tension: 280, friction: 60 }
-  });
-  
-  // Анимация движения
-  useFrame((state) => {
-    if (!mesh.current) return;
-    
-    const time = state.clock.getElapsedTime() * speed;
-    
-    switch (pattern) {
-      case 'circle':
-        mesh.current.position.x = position[0] + Math.sin(time + index * 0.1) * 0.3;
-        mesh.current.position.y = position[1] + Math.cos(time + index * 0.1) * 0.3;
-        break;
-        
-      case 'spiral':
-        mesh.current.position.x = position[0] + Math.sin(time + index * 0.05) * (0.3 + Math.sin(time * 0.2) * 0.1);
-        mesh.current.position.y = position[1] + Math.cos(time + index * 0.05) * (0.3 + Math.cos(time * 0.2) * 0.1);
-        mesh.current.position.z = position[2] + Math.sin(time * 0.1 + index * 0.01) * 0.1;
-        break;
-        
-      case 'vortex':
-        const radius = 0.3 + Math.sin(time * 0.1 + index * 0.01) * 0.2;
-        mesh.current.position.x = position[0] + Math.sin(time * 0.5 + index * 0.01) * radius;
-        mesh.current.position.y = position[1] + Math.cos(time * 0.5 + index * 0.01) * radius;
-        mesh.current.position.z = position[2] + Math.sin(time * 0.2 + index * 0.02) * 0.2;
-        mesh.current.rotation.x = time * 0.2 + index * 0.01;
-        mesh.current.rotation.y = time * 0.1 + index * 0.01;
-        break;
-        
-      default:
-        mesh.current.position.x = position[0] + Math.sin(time + index) * 0.2;
-        mesh.current.position.y = position[1] + Math.cos(time + index) * 0.2;
-    }
-  });
+// Главный компонент визуализатора спредов
+const SpreadVisualizer = ({ spreadId = 1 }) => {
+  const visualizerType = VISUALIZER_TYPES[spreadId] || 'CRYSTAL';
   
   return (
-    <animated.mesh
-      ref={mesh}
-      position={position}
-      scale={scale}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
-    >
-      <sphereGeometry args={[0.02, 16, 16]} />
-      <meshStandardMaterial 
-        color={color} 
-        emissive={color}
-        emissiveIntensity={0.5}
-        toneMapped={false}
-      />
-    </animated.mesh>
-  );
-};
-
-// Компонент карты Таро в 3D пространстве
-const TarotCard = ({ position, rotation, index, color }) => {
-  const mesh = useRef();
-  
-  // Анимация левитации
-  useFrame((state) => {
-    if (!mesh.current) return;
-    const time = state.clock.getElapsedTime();
-    
-    mesh.current.position.y += Math.sin(time * 0.5 + index * 0.3) * 0.0005;
-    mesh.current.rotation.z = rotation[2] + Math.sin(time * 0.3 + index * 0.2) * 0.02;
-  });
-  
-  return (
-    <mesh
-      ref={mesh}
-      position={position}
-      rotation={rotation}
-    >
-      <boxGeometry args={[0.15, 0.25, 0.01]} />
-      <meshStandardMaterial 
-        color="#1a1a2e"
-        metalness={0.5}
-        roughness={0.2}
-      />
-      <mesh position={[0, 0, 0.006]}>
-        <planeGeometry args={[0.13, 0.23]} />
-        <meshStandardMaterial 
-          color={color}
-          emissive={color}
-          emissiveIntensity={0.3}
-          toneMapped={false}
-        />
-      </mesh>
-    </mesh>
-  );
-};
-
-// Основной компонент визуализации
-const VisualizerScene = ({ spreadName, difficulty = 'medium', cards_count = 3 }) => {
-  const group = useRef();
-  const [particles, setParticles] = useState([]);
-  const [cards, setCards] = useState([]);
-  
-  // Получаем настройки для текущего стиля
-  const visualStyle = VISUAL_STYLES[difficulty] || VISUAL_STYLES.medium;
-  
-  // Генерация частиц и карт при монтировании
-  useEffect(() => {
-    // Создаем частицы
-    const newParticles = [];
-    for (let i = 0; i < visualStyle.particleCount; i++) {
-      const isSpecial = Math.random() > 0.85;
-      newParticles.push({
-        id: i,
-        position: [
-          (Math.random() - 0.5) * 2,
-          (Math.random() - 0.5) * 2,
-          (Math.random() - 0.5) * 2
-        ],
-        color: isSpecial ? visualStyle.secondaryColor : visualStyle.baseColor,
-        size: isSpecial ? 0.02 + Math.random() * 0.01 : 0.01 + Math.random() * 0.01
-      });
-    }
-    setParticles(newParticles);
-    
-    // Создаем карты
-    const newCards = [];
-    const radius = 0.5;
-    const angleStep = (Math.PI * 2) / cards_count;
-    
-    for (let i = 0; i < cards_count; i++) {
-      // Разные паттерны расположения карт для разных раскладов
-      let cardPosition, cardRotation;
-      
-      if (cards_count <= 3) {
-        // Линейное расположение для малых раскладов
-        cardPosition = [(i - (cards_count - 1) / 2) * 0.2, 0, 0];
-        cardRotation = [0, 0, 0];
-      } else if (cards_count <= 5) {
-        // Полукруг
-        const angle = i * angleStep - Math.PI / 2;
-        cardPosition = [Math.cos(angle) * radius * 0.6, Math.sin(angle) * radius * 0.3, 0];
-        cardRotation = [0, 0, angle + Math.PI / 2];
-      } else {
-        // Круг или сложная форма
-        const angle = i * angleStep;
-        cardPosition = [Math.cos(angle) * radius, Math.sin(angle) * radius, 0];
-        cardRotation = [0, 0, angle + Math.PI / 2];
-      }
-      
-      newCards.push({
-        id: i,
-        position: cardPosition,
-        rotation: cardRotation,
-        color: i % 2 === 0 ? visualStyle.baseColor : visualStyle.secondaryColor
-      });
-    }
-    setCards(newCards);
-  }, [cards_count, difficulty, visualStyle]);
-  
-  // Анимация группы 
-  useFrame((state) => {
-    if (!group.current) return;
-    const time = state.clock.getElapsedTime();
-    
-    group.current.rotation.y = Math.sin(time * 0.1) * 0.2;
-    group.current.rotation.x = Math.cos(time * 0.2) * 0.1;
-  });
-  
-  return (
-    <>
-      <ambientLight intensity={0.5} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
-      <pointLight position={[-10, -10, 5]} intensity={0.5} color="#8b58ff" />
-      
-      <group ref={group}>
-        {particles.map((particle) => (
-          <Particle
-            key={particle.id}
-            position={particle.position}
-            color={particle.color}
-            index={particle.id}
-            speed={visualStyle.speed}
-            pattern={visualStyle.pattern}
-          />
-        ))}
+    <VisualizerWrapper>
+      <Canvas shadows camera={{ position: [0, 0, 5], fov: 50 }}>
+        <color attach="background" args={['#12121f']} />
         
-        {cards.map((card) => (
-          <TarotCard
-            key={card.id}
-            position={card.position}
-            rotation={card.rotation}
-            index={card.id}
-            color={card.color}
-          />
-        ))}
-        
-        <Text
-          position={[0, -0.8, 0]}
-          fontSize={0.1}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
+        <PresentationControls
+          global
+          config={{ mass: 2, tension: 500 }}
+          snap={{ mass: 4, tension: 1500 }}
+          rotation={[0, 0, 0]}
+          polar={[-Math.PI / 3, Math.PI / 3]}
+          azimuth={[-Math.PI / 1.4, Math.PI / 2]}
         >
-          {spreadName}
-        </Text>
-      </group>
-    </>
+          <VisualizerSelector type={visualizerType} />
+        </PresentationControls>
+        
+        <Environment preset="night" />
+      </Canvas>
+    </VisualizerWrapper>
   );
 };
 
-// Главный экспортируемый компонент
-const SpreadVisualizer = ({ spreadName, difficulty, cards_count }) => {
-  return (
-    <Canvas
-      camera={{ position: [0, 0, 2], fov: 60 }}
-      dpr={[1, 2]}
-      gl={{ antialias: true }}
-      style={{
-        width: '100%',
-        height: '100%',
-        background: 'radial-gradient(ellipse at center, #1f1f35 0%, #12121f 100%)',
-        borderRadius: 'inherit'
-      }}
-    >
-      <VisualizerScene 
-        spreadName={spreadName}
-        difficulty={difficulty}
-        cards_count={cards_count}
-      />
-    </Canvas>
-  );
-};
+// Стили
+const VisualizerWrapper = styled(motion.div)`
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  touch-action: none;
+  
+  @media (max-width: 768px) {
+    height: 250px;
+  }
+`;
 
 export default SpreadVisualizer; 
