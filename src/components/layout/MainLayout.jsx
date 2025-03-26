@@ -43,15 +43,24 @@ const MainLayout = () => {
     };
   }, [isMobile]);
   
+  // Для десктопа показываем плейсхолдер
+  if (!isMobile) {
+    return (
+      <LayoutContainer>
+        <StarryBackground />
+        <DesktopPlaceholder />
+      </LayoutContainer>
+    );
+  }
+  
+  // Для мобильных устройств показываем полный интерфейс
   return (
     <LayoutContainer className="layout-container">
       <StarryBackground />
-      <DesktopPlaceholder />
-      <TarotBackground />
       
-      {isMobile ? <MobileHeader /> : <Navbar />}
+      <MobileHeader />
       
-      <MainContent className="main-content" $isMobile={isMobile}>
+      <MainContent className="main-content" $isMobile={true}>
         <AnimatePresence mode="wait">
           <PageTransition key={location.pathname}>
             <Outlet />
@@ -59,7 +68,7 @@ const MainLayout = () => {
         </AnimatePresence>
       </MainContent>
       
-      {isMobile ? <MobileNavbar /> : <Footer />}
+      <MobileNavbar />
     </LayoutContainer>
   );
 };

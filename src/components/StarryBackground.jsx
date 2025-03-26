@@ -7,57 +7,32 @@ const StarryBackground = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    let animationFrameId;
     
     const setCanvasSize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     };
     
-    window.addEventListener('resize', setCanvasSize);
     setCanvasSize();
+    window.addEventListener('resize', setCanvasSize);
     
-    // Create stars
-    let stars = [];
-    const createStars = () => {
-      stars = [];
-      const starCount = 100;
+    // Простой фон
+    ctx.fillStyle = '#12121f';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Создаем 100 звезд
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      const size = Math.random() * 2 + 0.5;
       
-      for (let i = 0; i < starCount; i++) {
-        stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() * 2 + 0.5,
-          opacity: Math.random() * 0.8 + 0.2
-        });
-      }
-    };
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
     
-    createStars();
-    
-    // Animation
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#12121f';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
-      // Draw stars
-      stars.forEach(star => {
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      
-      animationFrameId = requestAnimationFrame(animate);
-    };
-    
-    animate();
-    
-    return () => {
-      window.removeEventListener('resize', setCanvasSize);
-      cancelAnimationFrame(animationFrameId);
-    };
+    return () => window.removeEventListener('resize', setCanvasSize);
   }, []);
   
   return <Canvas ref={canvasRef} />;
@@ -70,7 +45,6 @@ const Canvas = styled.canvas`
   width: 100%;
   height: 100%;
   z-index: -1;
-  display: block;
 `;
 
 export default StarryBackground; 

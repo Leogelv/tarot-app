@@ -1,38 +1,41 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import MainLayout from './components/layout/MainLayout';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import CardLibrary from './pages/CardLibrary';
-import CardDetails from './pages/CardDetails';
-import DailyCard from './pages/DailyCard';
-import Spreads from './pages/Spreads';
-import SpreadDetails from './pages/SpreadDetails';
-import Profile from './pages/Profile';
-import NotFound from './pages/NotFound';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import About from './pages/About';
+import StarryBackground from './components/StarryBackground';
+import styled from 'styled-components';
 
 const App = () => {
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth <= 767);
+    };
+    
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+    };
+  }, []);
+  
   return (
-    <Router>
+    <Container>
+      <StarryBackground />
       <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} />
-          <Route path="cards" element={<CardLibrary />} />
-          <Route path="cards/:cardId" element={<CardDetails />} />
-          <Route path="daily" element={<DailyCard />} />
-          <Route path="spreads" element={<Spreads />} />
-          <Route path="spreads/:spreadId" element={<SpreadDetails />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="about" element={<About />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
+        <Route path="/" element={<Home />} />
+        <Route path="*" element={<div style={{color: 'white', padding: 20}}>Страница не найдена</div>} />
       </Routes>
-    </Router>
+    </Container>
   );
 };
+
+const Container = styled.div`
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  background: linear-gradient(to bottom, #12121f, #2d2b42);
+`;
 
 export default App;
