@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useMouse } from 'react-use';
 import * as THREE from 'three';
 import { useSpring, animated } from '@react-spring/three';
-import { Text, Html, Environment, OrbitControls } from '@react-three/drei';
+import { Text, Html } from '@react-three/drei';
 
 // Текстура рубашки карты 
 const CARD_BACK_TEXTURE = 'https://i.ibb.co/N7PpRnK/card-back.jpg';
@@ -193,8 +193,6 @@ const TarotDeck3D = ({ onCardSelected, cardData }) => {
       <fog attach="fog" args={['#12121f', 5, 15]} />
       
       <DeckScene onCardSelected={onCardSelected} cardData={cardData} />
-      
-      <Environment preset="night" />
     </Canvas>
   );
 };

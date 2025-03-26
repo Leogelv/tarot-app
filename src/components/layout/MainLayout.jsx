@@ -1,65 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import MobileHeader from './MobileHeader';
-import MobileNavbar from './MobileNavbar';
-import StarryBackground from '../StarryBackground';
-import DesktopPlaceholder from '../DesktopPlaceholder';
-
-// Components
 import Navbar from './Navbar';
+import MobileNavbar from './MobileNavbar';
+import MobileHeader from './MobileHeader';
+import StarryBackground from '../StarryBackground';
 import Footer from './Footer';
-import TarotBackground from '../effects/TarotBackground';
-import PageTransition from '../effects/PageTransition';
 
-// Main layout component that wraps all pages
-const MainLayout = () => {
-  const location = useLocation();
-  const [isMobile, setIsMobile] = useState(false);
-  
-  // Check if device is mobile
+const MainLayout = ({ children }) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
   useEffect(() => {
-    const checkDeviceType = () => {
-      setIsMobile(window.innerWidth <= 767);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
     };
-    
-    // Initial check
-    checkDeviceType();
-    
-    // Listen for window resize
-    window.addEventListener('resize', checkDeviceType);
-    
-    // Add body class for mobile styling
-    if (isMobile) {
-      document.body.classList.add('mobile-view');
-    } else {
-      document.body.classList.remove('mobile-view');
-    }
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', checkDeviceType);
-    };
-  }, [isMobile]);
-  
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <LayoutContainer className="layout-container">
+    <LayoutContainer>
       <StarryBackground />
-      <DesktopPlaceholder />
-      <TarotBackground />
       
-      {isMobile ? <MobileHeader /> : <Navbar />}
+      {isMobile ? (
+        <>
+          <MobileHeader />
+          <MainContent>
+            {children}
+          </MainContent>
+          <MobileNavbar />
+        </>
+      ) : (
+        <>
+          <Navbar />
+          <MainContent desktop>
+            {children}
+          </MainContent>
+        </>
+      )}
       
-      <MainContent className="main-content" $isMobile={isMobile}>
-        <AnimatePresence mode="wait">
-          <PageTransition key={location.pathname}>
-            <Outlet />
-          </PageTransition>
-        </AnimatePresence>
-      </MainContent>
-      
-      {isMobile ? <MobileNavbar /> : <Footer />}
+      <Footer />
     </LayoutContainer>
   );
 };
@@ -68,17 +48,19 @@ const LayoutContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
   position: relative;
-  background-color: var(--background);
 `;
 
 const MainContent = styled.main`
   flex: 1;
-  padding: ${props => props.$isMobile ? '20px 0 80px' : '100px 0 60px'};
+  padding-top: ${props => props.desktop ? '0' : '70px'};
+  padding-bottom: ${props => props.desktop ? '0' : '80px'};
   width: 100%;
-  max-width: 100vw;
-  position: relative;
-  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  
+  @media (max-width: 768px) {
+    padding-top: 20px;
+  }
 `;
 
 export default MainLayout; 

@@ -1,38 +1,40 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
-import Home from './pages/Home';
-import CardLibrary from './pages/CardLibrary';
-import CardDetails from './pages/CardDetails';
-import DailyCard from './pages/DailyCard';
-import Spreads from './pages/Spreads';
-import SpreadDetails from './pages/SpreadDetails';
-import Profile from './pages/Profile';
-import NotFound from './pages/NotFound';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import About from './pages/About';
+import HomePage from './pages/Home';
+import LoginPage from './pages/Login';
+import RegisterPage from './pages/Register';
+import ProfilePage from './pages/Profile';
+import CardsPage from './pages/CardLibrary';
+import CardDetailsPage from './pages/CardDetails';
+import SpreadsPage from './pages/Spreads';
+import SpreadDetailsPage from './pages/SpreadDetails';
+import DailyCardPage from './pages/DailyCard';
+import AboutUsPage from './pages/AboutUs';
+import SearchPage from './pages/Search';
+import NotFoundPage from './pages/NotFound';
 
-const App = () => {
+function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Home />} />
-          <Route path="cards" element={<CardLibrary />} />
-          <Route path="cards/:cardId" element={<CardDetails />} />
-          <Route path="daily" element={<DailyCard />} />
-          <Route path="spreads" element={<Spreads />} />
-          <Route path="spreads/:spreadId" element={<SpreadDetails />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="about" element={<About />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
+      <MainLayout>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/cards" element={<CardsPage />} />
+          <Route path="/cards/:cardId" element={<CardDetailsPage />} />
+          <Route path="/spreads" element={<SpreadsPage />} />
+          <Route path="/spreads/:spreadId" element={<SpreadDetailsPage />} />
+          <Route path="/daily-card" element={<DailyCardPage />} />
+          <Route path="/about" element={<AboutUsPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </MainLayout>
     </Router>
   );
-};
+}
 
 export default App;

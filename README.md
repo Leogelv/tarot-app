@@ -1,109 +1,62 @@
-# Tarot Insights
+# Tarot App
 
-A modern web application for exploring Tarot, created with React and Supabase.
+Мобильное приложение для работы с картами Таро. Получайте ежедневные предсказания, изучайте карты и делайте расклады.
 
-## Features
+## Функциональность
 
-- 🔮 Full Tarot card library with detailed interpretations
-- 🌙 Daily card readings with personalized insights
-- 🔯 Multiple spread options for comprehensive readings
-- 📝 Save your readings with personal reflections
-- 👤 User profiles with reading history
-- ✨ Premium features for subscribers
-- 📱 Responsive design with enhanced mobile experience
-- 🎨 Beautiful animations and page transitions
-- 🌟 Interactive 3D backgrounds with Three.js
+- Библиотека карт Таро с подробными описаниями
+- Ежедневная карта с персонализированным толкованием
+- Различные виды раскладов
+- Профиль пользователя с историей гаданий
+- Звездное небо и анимации для атмосферы
 
-## Tech Stack
+## Технологии
 
-- **Frontend**: React, Redux Toolkit, Styled Components
-- **Backend**: Supabase (Authentication, Database, Storage)
-- **Styling**: CSS-in-JS with Styled Components
-- **Routing**: React Router v6
-- **Build Tool**: Vite
-- **Animations**: Framer Motion
-- **3D Effects**: Three.js
-- **Mobile**: Progressive Web App (PWA) support
+- React.js
+- React Router для навигации
+- Redux для управления состоянием
+- Styled Components для стилизации
+- Framer Motion для анимаций
+- Material Icons для иконок
 
-## Mobile Features
+## Запуск проекта
 
-The application includes special enhancements for mobile users:
-- Responsive design that adapts to various screen sizes
-- Touch-friendly controls with tap highlight feedback
-- Bottom navigation bar for easy one-handed operation
-- Custom mobile header that maximizes content space
-- 3D particle background for an immersive experience
-- Smooth page transitions for seamless navigation
-- PWA support for home screen installation
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v14 or higher)
-- npm or yarn
-- Supabase account (for backend services)
-
-### Installation
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/tarot-insights.git
-   cd tarot-insights
-   ```
-
-2. Install dependencies:
-   ```
-   npm install
-   # or
-   yarn
-   ```
-
-3. Create a `.env` file in the root directory and add your Supabase credentials:
-   ```
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-4. Start the development server:
-   ```
-   npm run dev
-   # or
-   yarn dev
-   ```
-
-5. Open [http://localhost:5173](http://localhost:5173) to view the app in your browser.
-
-## Database Structure
-
-The application uses the following Supabase tables:
-
-- `cards` - Stores all tarot card information
-- `spreads` - Defines available tarot spreads
-- `positions` - Defines positions within spreads
-- `users` - User information (handled by Supabase Auth)
-- `readings` - Saved readings by users
-- `reading_cards` - Cards within a reading
-- `daily_cards` - Daily card draws for users
-- `profiles` - Extended user profile information
-- `subscriptions` - User subscription status
-
-## Deployment
-
-The application can be deployed to services like Vercel, Netlify, or any other platform that supports React applications.
-
-To build for production:
+1. Клонировать репозиторий:
+```bash
+git clone https://github.com/your-username/tarot-app.git
 ```
+
+2. Установить зависимости:
+```bash
+npm install
+```
+
+3. Запустить проект в режиме разработки:
+```bash
+npm run dev
+```
+
+4. Открыть в браузере http://localhost:5173/
+
+## Сборка проекта
+
+```bash
 npm run build
-# or
-yarn build
 ```
 
-## License
+## Деплой
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+Проект можно развернуть с помощью:
+- Vercel
+- Netlify
+- Railway
 
-## Acknowledgments
+## Скриншоты
 
-- Card imagery based on traditional Rider-Waite-Smith deck
-- Tarot interpretations compiled from various public domain sources
+![Домашняя страница](/public/assets/images/screenshot-home.png)
+![Карта дня](/public/assets/images/screenshot-daily.png)
+![Библиотека карт](/public/assets/images/screenshot-cards.png)
+
+## Лицензия
+
+MIT

@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useSpring, animated } from '@react-spring/three';
-import { Text, EffectComposer, Bloom, Vignette } from '@react-three/drei';
+import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Различные визуальные стили для разных типов раскладов
@@ -236,26 +236,10 @@ const VisualizerScene = ({ spreadName, difficulty = 'medium', cards_count = 3 })
           color="#ffffff"
           anchorX="center"
           anchorY="middle"
-          font="/fonts/Unbounded-Medium.ttf"
         >
           {spreadName}
         </Text>
       </group>
-      
-      <EffectComposer>
-        <Bloom 
-          luminanceThreshold={0.2}
-          luminanceSmoothing={0.9}
-          intensity={1} 
-          radius={0.8}
-        />
-        <Vignette
-          offset={0.1}
-          darkness={0.9}
-          eskil={false}
-          opacity={0.3}
-        />
-      </EffectComposer>
     </>
   );
 };
