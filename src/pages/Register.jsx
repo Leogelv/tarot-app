@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { registerUser, clearAuthError } from '../store/slices/authSlice';
+import { registerUser, clearErrors } from '../store/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Register = () => {
@@ -29,7 +29,7 @@ const Register = () => {
   
   useEffect(() => {
     // Clear any previous errors when component mounts
-    dispatch(clearAuthError());
+    dispatch(clearErrors());
   }, [dispatch]);
   
   const handleChange = (e) => {
@@ -41,7 +41,7 @@ const Register = () => {
     
     // Очищаем ошибки при изменении данных формы
     if (error) {
-      dispatch(clearAuthError());
+      dispatch(clearErrors());
     }
   };
   

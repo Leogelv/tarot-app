@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { loginUser, clearAuthError } from '../store/slices/authSlice';
+import { loginUser, clearErrors } from '../store/slices/authSlice';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -26,13 +26,13 @@ const Login = () => {
     }
     
     // Clear any previous errors when component mounts
-    dispatch(clearAuthError());
+    dispatch(clearErrors());
   }, [isAuthenticated, navigate, location, dispatch]);
   
   useEffect(() => {
     // Очищаем ошибки при размонтировании компонента
     return () => {
-      dispatch(clearAuthError());
+      dispatch(clearErrors());
     };
   }, [dispatch]);
   
@@ -45,7 +45,7 @@ const Login = () => {
     
     // Clear any API error when user changes form
     if (error) {
-      dispatch(clearAuthError());
+      dispatch(clearErrors());
     }
   };
   
